@@ -1,7 +1,7 @@
 # Helldivers Stratagem Input
 Helldivers 2 Stratagem input for PC
 
-I acheived voice command strategems in Helldivers 2 using Alexa, Home Assistant, and the HASS.Agent app on my W11 PC  
+I achieved voice command stratagems in Helldivers 2 using Alexa, Home Assistant, and the HASS.Agent app on my W11 PC  
 https://github.com/LAB02-Research/HASS.Agent  
 
 The basic flow is  
@@ -19,3 +19,5 @@ If the script is placed somewhere on your Windows path, you can call it with jus
 However, the HASS.Agent program cannot call it directly, I believe because it isn't running the commands in powershell but CMD,  so the longform is required  
 Inside the HASS.Agent, I set up a Custom Command of type switch, with the command formatted like  
     `powershell.exe -File "C:\Users\andre\automagic-democracy.ps1" -strat "Orbital Laser"`
+
+Add me on [Steam](https://steamcommunity.com/id/BroManDudeGuyPhD/) if you are so inclined!
