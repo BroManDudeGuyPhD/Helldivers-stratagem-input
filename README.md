@@ -16,4 +16,6 @@ The param is where the script captures the text entered in at the command line. 
 If the script is placed somewhere on your Windows path, you can call it with just  
     `automagic-democracy -strat "Airstrike"`  
 
-However, the HASS.Agent program cannot call it directly, I believe because it isn't running the commands in powershell but CMD,  so the longform is required
+However, the HASS.Agent program cannot call it directly, I believe because it isn't running the commands in powershell but CMD,  so the longform is required  
+Inside the HASS.Agent, I set up a Custom Command of type switch, with the command formatted like  
+    `powershell.exe -File "C:\Users\andre\automagic-democracy.ps1" -strat "Orbital Laser"`
