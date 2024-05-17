@@ -12,8 +12,8 @@ Unfortunately, each stratagem is a unique command in the HASS.Agent. But really,
 So I've mapped what I feel are the most common loadouts, but the switch statement is easily expandable
 
 The param is where the script captures the text entered in at the command line. The command would look like
-  ->   powershell.exe -File "C:\Users\username\democracy.ps1" -strat "Airstrike"
+    `powershell.exe -File "C:\Users\username\automagic-democracy.ps1" -strat "Airstrike"`
 If the script is placed somewhere on your Windows path, you can call it with just 
-  ->   democracy -strat "Airstrike"
+    `automagic-democracy -strat "Airstrike"`
 
 However, the HASS.Agent program cannot call it directly, I believe because it isn't running the commands in powershell but CMD,  so the longform is required
