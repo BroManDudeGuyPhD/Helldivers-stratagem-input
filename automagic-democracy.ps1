@@ -123,7 +123,7 @@ function Enter-Keypress {
     
     foreach ($key in $keyPresses) {
         #Loops thru each character of the codes entered manually above, presses the corresponding arrow, then waits 50 ms
-        Start-Sleep -Milliseconds 50
+        Start-Sleep -Milliseconds $keypressWaitTime
         if ($key -eq "U") {
             [System.Windows.Forms.SendKeys]::SendWait("{UP}");
         }
@@ -143,7 +143,10 @@ function Enter-Keypress {
 }
 
 
-#Main
+# Main
+
+#wait time in milliseconds between keypresses
+$keypressWaitTime = 70
 
 if ($null -ne $code) {
     Enter-Keypress -stratagemCode $code
