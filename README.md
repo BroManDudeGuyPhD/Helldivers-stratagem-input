@@ -1,5 +1,4 @@
-# Helldivers Stratagem Input
-Helldivers 2 Stratagem input for PC
+# Helldivers Automated Stratagem Input  
 
 I [achieved voice command stratagems](https://www.youtube.com/watch?v=x0HwI6L7jYI) in Helldivers 2 using Alexa, Home Assistant, and the [HASS.Agent](https://github.com/LAB02-Research/HASS.Agent) app on my W11 PC   
 
