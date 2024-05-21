@@ -12,105 +12,16 @@ param (
 add-type -AssemblyName microsoft.VisualBasic
 add-type -AssemblyName System.Windows.Forms
 
- #An expandable list of stratagems, the presses are done in the Key-Press function so this is easily expandable
- switch ($strat) {
+ #Right now the stratagem list is hardcoded, but I intend to generate it dynamically by scraping data off a Wiki page and storing that in the stratagems.json file
 
-    #Orbitals
-    "Precision Strike"{
-        $code = "RRD"
-    }
+ $stratagemCodeFile = (Get-Content "stratagems.json" -Raw) | ConvertFrom-Json
 
-    "Orbital Laser"{
-        $code = "RDURD"
-    }
+ $requestedCode = $stratagemCodeFile.stratagems | Where-Object { $_.Name -eq $strat }
+ 
+ $code = $requestedCode.code
 
-    "Orbital Railcannon"{
-        $code = "RUDDR"
-    }
-
-
-    #--Eagles--
-    "Strafing Run"{
-        $code = "URR"
-    }
-
-    "Airstrike"{
-        $code = "URDR"
-    }
-
-    "Cluster Bomb"{
-        $code = "URDDR"
-    }
-
-    "Napalm"{
-        $code = "URDU"
-    }
-
-    "Rocket Pods"{
-        $code = "URUL"
-    }
-
-    "500kg bomb"{
-        $code = "URDDD"
-    }
-    
-
-    #--Support Weapons--
-    "Machine Gun"{
-        $code = "DLDUR"
-    }
-
-    "Anit-Material Rifle"{
-        $code = "DLRUD"
-    }
-
-    "Autocannon"{
-        $code = "DLDUUR"
-    }
-    
-    "Rail gun"{
-        $code = "DRDULR"
-    }
-
-    "Spear"{
-        $code = "DDUDD"
-    }
-
-    "Laser cannon"{
-        $code = "DLDUL";
-    }
-
-
-    #--Backpacks--
-    "Laser Drone"{
-        $code = "DULURR"
-    }
-
-    "Gun Drone"{
-        $code = ""
-    }
-
-
-    #--Supplies--
-    "Resupply"{
-        $code = "DDUR"
-    }
-
-    "Reinforce"{
-        $code = "UDRLU"
-    }
-
-    "Artillery"{
-        #SEAF Artillery
-        $code = "RUUD"
-    }
-
-    "Hellbomb"{
-        $code = "DULDURDU"
-    }
- }
-
-
+ #Output the code for troubleshooting
+ $code
 function Enter-Keypress {
     param (
         [string[]]$stratagemCode
