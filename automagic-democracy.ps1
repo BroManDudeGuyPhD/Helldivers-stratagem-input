@@ -5,23 +5,118 @@
 #>
 
 param (
-    [Parameter(Mandatory=$true)]
-    [string]$strat
- )
+    [Parameter(Mandatory = $false)]
+    [string]$strat,
+    [Parameter(Mandatory = $false)]
+    [switch]$update
+)
+
+#wait time in milliseconds between keypresses
+$keypressWaitTime = 70
+$stratagesmDataFile = "stratagems.json"
 
 add-type -AssemblyName microsoft.VisualBasic
 add-type -AssemblyName System.Windows.Forms
 
- #Right now the stratagem list is hardcoded, but I intend to generate it dynamically by scraping data off a Wiki page and storing that in the stratagems.json file
+#Right now the stratagem list is hardcoded, but I intend to generate it dynamically by scraping data off a Wiki page and storing that in the stratagems.json file
 
- $stratagemCodeFile = (Get-Content "stratagems.json" -Raw) | ConvertFrom-Json
+if ($update) {
+    Write-Host "Updating Stratagems"
 
- $requestedCode = $stratagemCodeFile.stratagems | Where-Object { $_.Name -eq $strat }
- 
- $code = $requestedCode.code
+    $StratagemHashTable = @{}
 
- #Output the code for troubleshooting
- $code
+    
+    
+    #Copy-Item .\stratagems.json stratagems.json.bak
+
+    $wikiURL = "https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2)"
+    #$wikiURL = "http://www.egyptianhieroglyphs.net/gardiners-sign-list/domestic-and-funerary-furniture/"
+
+    #Invoke-WebRequest $wikiURL
+    #(Invoke-WebRequest -Uri $wikiURL).Images | Select-Object src 
+    $request = Invoke-WebRequest -Uri $wikiURL
+    
+    $tables = @($request.ParsedHtml.getElementsByTagName("TABLE"))
+
+    foreach ($table in $tables) {
+
+        $rows = @($table.Rows)
+        
+        foreach ($row in $rows) {
+            $inputCode = ""
+
+            $cells = @($row.Cells)
+            
+            if ($cells[0].tagName -eq "TD") {
+
+                $cells[2].childNodes | Foreach-Object {
+                    if ($_.className -eq 'image') { 
+                        $arrowDirection = $_
+
+                        $arrowDirection = $arrowDirection.href
+                        $splitArray = $arrowDirection -split '.png'
+                        $temp = $splitArray[0]
+                        $lastChar = $temp[-1]
+
+
+                        if($lastChar -match "U"){
+                            $inputCode+="U"
+                        }
+
+                        elseif($lastChar -match "D"){
+                            $inputCode+="D"
+                        }
+
+                        elseif($lastChar -match "L"){
+                            $inputCode+="L"
+                        }
+
+                        elseif($lastChar -match "R"){
+                            $inputCode+="R"
+                        }
+
+                    }
+                }
+
+
+                $name = @($cells[1] | ForEach-Object { ("" + $_.InnerText).Trim() })
+                
+                $coolDown = @($cells[3] | ForEach-Object { ("" + $_.InnerText).Trim() })
+                $uses = @($cells[4] | ForEach-Object { ("" + $_.InnerText).Trim() })
+                $activationTime = @($cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() })
+
+                $info = @{
+                    'Alias'           = ''
+                    'Code'            = $inputCode
+                    'Cooldown'        = $coolDown
+                    'Uses'            = $uses
+                    'Activation Time' = $activationTime
+                }
+
+                $StratagemHashTable.Add($name,$info)
+                continue
+            }
+        }
+    }
+
+
+    foreach ($key in $StratagemHashTable.Keys) {
+
+        if($key -eq $strat){
+            Write-Host $key $StratagemHashTable.$key.Code -ForegroundColor Cyan
+        }
+    }
+    
+} 
+
+$stratagemCodeFile = (Get-Content $stratagesmDataFile -Raw) | ConvertFrom-Json
+
+$requestedCode = $stratagemCodeFile.stratagems | Where-Object { $_.Name -eq $strat }
+
+$code = $requestedCode.code
+
+#Output the code for troubleshooting
+$code
 function Enter-Keypress {
     param (
         [string[]]$stratagemCode
@@ -55,9 +150,6 @@ function Enter-Keypress {
 
 
 # Main
-
-#wait time in milliseconds between keypresses
-$keypressWaitTime = 70
 
 if ($null -ne $code) {
     Enter-Keypress -stratagemCode $code
