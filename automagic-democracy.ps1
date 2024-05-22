@@ -86,11 +86,11 @@ if ($update) {
                 $activationTime = @($cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() })
 
                 $info = @{
-                    'Alias'           = ''
+                    'Alias'           = 'None'
                     'Code'            = $inputCode
                     'Cooldown'        = $coolDown
                     'Uses'            = $uses
-                    'Activation Time' = $activationTime
+                    'ActivationTime' = $activationTime
                 }
 
                 $StratagemHashTable.Add($name,$info)
@@ -104,9 +104,15 @@ if ($update) {
 
         if($key -eq $strat){
             Write-Host $key $StratagemHashTable.$key.Code -ForegroundColor Cyan
+            $StratagemHashTable.$key
         }
-    }
-    
+
+        $output = "$($key), $($StratagemHashTable.$key.Alias), $($StratagemHashTable.$key.Code), $($StratagemHashTable.$key.Cooldown), $($StratagemHashTable.$key.Uses), $($StratagemHashTable.$key.ActivationTime)"
+        $output | Add-Content "log.csv"
+    }  
+
+
+
 } 
 
 $stratagemCodeFile = (Get-Content $stratagesmDataFile -Raw) | ConvertFrom-Json

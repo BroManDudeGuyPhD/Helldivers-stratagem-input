@@ -1,0 +1,62 @@
+AC-8 Autocannon, None, DLDUUR, 480 seconds (8m), Unlimited, 3 seconds
+SEAF Artillery, None, RUUD, N/A, 5, N/A
+Orbital Gatling Barrage, None, RDLUU, 80 seconds (1m 20s), Unlimited, 1 second
+Orbital 120MM HE Barrage, None, RRDLRD, 240 seconds (4m), Unlimited, 4 seconds
+A/M-23 EMS Mortar Sentry, None, DURDR, 180 seconds (3m), Unlimited, 3 seconds
+Eagle Napalm Airstrike, None, URDU, 8 seconds, 2, 3 seconds
+Eagle Rearm, None, UULUR, 2 minutes (rearms all your Eagle stratagems), Unlimited, N/A
+Reinforce, None, UDRLU, 120s (2m) (when depleted), 5 per Person, 5 seconds
+Eagle Strafing Run, None, URR, 8 seconds, 3, 1 second
+M-105 Stalwart, None, DLDUUL, 480 seconds (8m), Unlimited, 3 seconds
+SOS Beacon, None, UDRU, N/A, 1, 5 seconds
+Orbital Walking Barrage, None, RDRDRD, 240 seconds (4m), Unlimited, 2 seconds
+MG-206 Heavy Machine Gun, None, DLUDD, 480 seconds (8m), Unlimited, 8 seconds
+Illumination Flare, None, RRLL, N/A, Unlimited, N/A
+LAS-98 Laser Cannon, None, DLDUL, 480 seconds (8m), Unlimited, 3 Seconds
+MD-I4 Incendiary Mines, None, DLLD, 180 seconds (3m), Unlimited, 3 seconds
+APW-1 Anti-Materiel Rifle, None, DLRUD, 480 seconds (8m), Unlimited, 3 seconds
+GR-8 Recoilless Rifle, None, DLRRL, 480 seconds (8m), Unlimited, 3 seconds
+SSSD Delivery, None, DDDUU, N/A, Unlimited, N/A
+Orbital 380MM HE Barrage, None, RDUULDD, 240 seconds (4m), Unlimited, 5 seconds
+Upload Data, None, LRUUU, N/A, Unlimited, N/A
+RL-77 Airburst Rocket Launcher, None, DUULR, 480 seconds (8m), Unlimited, 3 Seconds
+Orbital Gas Strike, None, RRDR, 75 seconds (1m 15s), Unlimited, 1 second
+MG-43 Machine Gun, None, DLDUR, 480 seconds (8m), Unlimited, 3 seconds
+FLAM-40 Flamethrower, None, DLUDU, 480 seconds (8m), Unlimited, 3 seconds
+Eagle Cluster Bomb, None, URDDR, 8 seconds, 4, 3 seconds
+ARC-3 Arc Thrower, None, DRDULL, 480 seconds (8m), Unlimited, 3 Seconds
+Eagle Smoke Strike, None, URUD, 8 seconds, 2, 3 seconds
+RS-422 Railgun, None, DRDULR, 480 seconds (8m), Unlimited, 3 seconds
+A/ARC-3 Tesla Tower, None, DURULR, 150 seconds (2m 30s), Unlimited, 3 seconds
+Orbital EMS Strike, None, RRLD, 75 seconds (1m 15s), Unlimited, 1 second
+Orbital Smoke Strike, None, RRDU, 100 seconds (1m 40s), Unlimited, 1 second
+GL-21 Grenade Launcher, None, DLULD, 480 seconds (8m), Unlimited, 3 seconds
+Orbital Airburst Strike, None, RRR, 120 seconds (2m), Unlimited, 3 seconds
+Eagle 500kg Bomb, None, URDDD, 8 seconds, 1, 3 seconds
+SH-20 Ballistic Shield Backpack, None, DLDDUL, 300 seconds (5m), Unlimited, 5 seconds
+AX/AR-23 "Guard Dog", None, DULURD, 300 seconds (5m), Unlimited, 5 seconds
+A/G-16 Gatling Sentry, None, DURL, 180 seconds (3m), Unlimited, 3 seconds
+NUX-223 Hellbomb, None, DULDURDU, N/A, Unlimited, N/A
+EXO-45 Patriot Exosuit, None, LDRULDD, 600 seconds (10m), 2, 0 Seconds
+EAT-17 Expendable Anti-tank, None, DDLUR, 70 seconds (1m 10s), Unlimited, 2 seconds
+Orbital Precision Strike, None, RRU, 100 seconds (1m 40s), Unlimited, 3 seconds
+E/MG-101 HMG Emplacement, None, DULRRL, 180 seconds (3m), Unlimited, 3 seconds
+Resupply, None, DDUR, 160 seconds (2m 40s), Unlimited, 12 seconds
+Orbital Laser, None, RDURD, 300 seconds (5m), 3, 1 second
+A/MLS-4X Rocket Sentry, None, DURRL, 180 seconds (3m), Unlimited, 3 seconds
+Seismic Probe, None, UULRDD, N/A, 1, 9 seconds
+B-1 Supply Pack, None, DLDUUD, 480 seconds (8m), Unlimited, 5 seconds
+FAF-14 SPEAR Launcher, None, DDUDD, 480 seconds (8m), Unlimited, 3 seconds
+MD-6 Anti-Personnel Minefield, None, DLUR, 180 seconds (3m), Unlimited, 3 seconds
+A/M-12 Mortar Sentry, None, DURRD, 180 seconds (3m), Unlimited, 3 seconds
+Eagle 110MM Rocket Pods, None, URUL, 8 seconds, 2, 3 seconds
+SH-32 Shield Generator Pack, None, DULRLR, 480 seconds (8m), Unlimited, 5 seconds
+Super Earth Flag, None, DUDU, N/A, N/A, N/A
+FX-12 Shield Generator Relay, None, DDLRLR, 90 seconds (1m 30s), Unlimited, 3 seconds
+Orbital Railcannon Strike, None, RUDDR, 210 seconds (3m 30s), Unlimited, 2 seconds
+AX/LAS-5 "Guard Dog" Rover, None, DULURR, 480 seconds (8m), Unlimited, 5 seconds
+LIFT-850 Jump Pack, None, DUUDU, 480 seconds (8m), Unlimited, 5 seconds
+A/AC-8 Autocannon Sentry, None, DURULU, 180 seconds (3m), Unlimited, 3 seconds
+Eagle Airstrike, None, URDR, 8 seconds, 2, 3 seconds
+A/MG-43 Machine Gun Sentry, None, DURRU, 180 seconds (3m), Unlimited, 3 seconds
+LAS-99 Quasar Cannon, None, DDULR, 480 seconds (8m), Unlimited, 3 Seconds
