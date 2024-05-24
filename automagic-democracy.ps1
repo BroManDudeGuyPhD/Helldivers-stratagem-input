@@ -5,112 +5,148 @@
 #>
 
 param (
-    [Parameter(Mandatory=$true)]
-    [string]$strat
- )
+    [Parameter(Mandatory = $false)]
+    [string]$strat,
+    [Parameter(Mandatory = $false)]
+    [switch]$update
+)
 
-add-type -AssemblyName microsoft.VisualBasic
-add-type -AssemblyName System.Windows.Forms
+#wait time in milliseconds between keypresses
+$keypressWaitTime = 70
+$stratagesmDataFile = "stratagems.json"
 
- #An expandable list of stratagems, the presses are done in the Key-Press function so this is easily expandable
- switch ($strat) {
+Add-Type -AssemblyName microsoft.VisualBasic
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName PresentationCore,PresentationFramework
 
-    #Orbitals
-    "Precision Strike"{
-        $code = "RRD"
-    }
+#Right now the stratagem list is hardcoded, but I intend to generate it dynamically by scraping data off a Wiki page and storing that in the stratagems.json file
 
-    "Orbital Laser"{
-        $code = "RDURD"
-    }
+function Update-Json{
+	Write-Host "Updating Stratagems"
 
-    "Orbital Railcannon"{
-        $code = "RUDDR"
-    }
-
-
-    #--Eagles--
-    "Strafing Run"{
-        $code = "URR"
-    }
-
-    "Airstrike"{
-        $code = "URDR"
-    }
-
-    "Cluster Bomb"{
-        $code = "URDDR"
-    }
-
-    "Napalm"{
-        $code = "URDU"
-    }
-
-    "Rocket Pods"{
-        $code = "URUL"
-    }
-
-    "500kg bomb"{
-        $code = "URDDD"
-    }
+    $StratagemJson= @{}
+	$StratagemList = New-Object System.Collections.ArrayList
     
+    #Copy-Item .\stratagems.json stratagems.json.bak
 
-    #--Support Weapons--
-    "Machine Gun"{
-        $code = "DLDUR"
-    }
+    $wikiURL = "https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2)"
 
-    "Anit-Material Rifle"{
-        $code = "DLRUD"
-    }
-
-    "Autocannon"{
-        $code = "DLDUUR"
-    }
+    #Invoke-WebRequest $wikiURL
+    #(Invoke-WebRequest -Uri $wikiURL).Images | Select-Object src 
+    $request = Invoke-WebRequest -Uri $wikiURL
     
-    "Rail gun"{
-        $code = "DRDULR"
+    $tables = @($request.ParsedHtml.getElementsByTagName("TABLE"))
+
+    foreach ($table in $tables) {
+
+        $rows = @($table.Rows)
+        
+        foreach ($row in $rows) {
+            $inputCode = ""
+
+            $cells = @($row.Cells)
+            
+            if ($cells[0].tagName -eq "TD") {
+
+                $cells[2].childNodes | Foreach-Object {
+					#Looks in the table cell that contains stratagem codes for images, and uses image name to determine direction
+                    if ($_.className -eq 'image') { 
+                        $arrowDirection = $_
+
+                        $arrowDirection = $arrowDirection.href
+                        $splitArray = $arrowDirection -split '.png'
+                        $temp = $splitArray[0]
+                        $lastChar = $temp[-1]
+
+
+                        if($lastChar -match "U"){
+                            $inputCode+="U"
+                        }
+
+                        elseif($lastChar -match "D"){
+                            $inputCode+="D"
+                        }
+
+                        elseif($lastChar -match "L"){
+                            $inputCode+="L"
+                        }
+
+                        elseif($lastChar -match "R"){
+                            $inputCode+="R"
+                        }
+
+                    }
+                }
+
+				#Parse the HTML to determine info for each Stratagem
+
+                $name = $cells[1] | ForEach-Object { ("" + $_.InnerText).Trim() }
+                $coolDown = $cells[3] | ForEach-Object { ("" + $_.InnerText).Trim() }
+                $uses = $cells[4] | ForEach-Object { ("" + $_.InnerText).Trim() }
+                $activationTime = $cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() }
+				#$activationTime = @($cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() })
+				
+				#This may not be super important, but, doing a bit of formatting on the strings
+				$name = $name.Replace('"',"")
+				$coolDown = $coolDown.Replace("seconds","").Replace("second","")
+				$activationTime = $activationTime.Replace("seconds","").Replace("second","")
+				
+				#$name = $name.Replace('"',"")
+				#$name = $name -replace '"',""
+
+				
+
+                $StratagemList.Add(@{"Name"=$name;
+				"Alias"="";"Code"=$inputCode;
+				"Cooldown"=$coolDown;
+				"Uses"=$uses;
+				"ActivationTime"=$activationTime;})
+
+                continue
+            }
+        }
     }
 
-    "Spear"{
-        $code = "DDUDD"
+	$Stratagems = @{"Stratagems"=$StratagemList;}
+	$StratagemJson.Add("Democracy",$Stratagems)
+	$StratagemJson | ConvertTo-Json -Depth 10 | Out-File $stratagesmDataFile
+
+    foreach ($key in $StratagemJson.Democracy.Stratagems) {
+		
+        if($key.Name -eq $strat){
+            Write-Host $key.Name $key.Code -ForegroundColor Cyan
+        }
+		
     }
-
-    "Laser cannon"{
-        $code = "DLDUL";
-    }
-
-
-    #--Backpacks--
-    "Laser Drone"{
-        $code = "DULURR"
-    }
-
-    "Gun Drone"{
-        $code = ""
-    }
+}
+if ($update) {
+	Update-Json
+} 
 
 
-    #--Supplies--
-    "Resupply"{
-        $code = "DDUR"
-    }
+try {
+# This is there the script reads stratagems.json to check for the codes. If the file is missing, you get a popup
+# The datafile does NOT have to be generated this way, the -update command can be used when running the script
+	$stratagemCodeFile = (Get-Content $stratagesmDataFile -Raw -ErrorAction Stop) | ConvertFrom-Json
+	$requestedCode = $stratagemCodeFile.Democracy.Stratagems | Where-Object { $_.Name -eq $strat }
+	$code = $requestedCode.code
+}
+catch [System.Management.Automation.ItemNotFoundException]{
+	$ButtonType = [System.Windows.MessageBoxButton]::YesNoCancel
+	$MessageboxTitle = "No stratagem data file found!"
+	$Messageboxbody = "I can automatically generate the JSON file by accessing the internet and grabbing data from the Helldivers 2 Wiki, or you can download stratagams.json from the repo. May I attempt to generate the file now?"
+	$MessageIcon = [System.Windows.MessageBoxImage]::Warning
+	$Result = [System.Windows.MessageBox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
 
-    "Reinforce"{
-        $code = "UDRLU"
-    }
+	if ($Result -eq "Yes"){
+		Write-Host "Downloading info from https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2)" -ForegroundColor Magenta
+		Update-Json
+	}
 
-    "Artillery"{
-        #SEAF Artillery
-        $code = "RUUD"
-    }
+}
 
-    "Hellbomb"{
-        $code = "DULDURDU"
-    }
- }
-
-
+#Output the code for troubleshooting
+#$code
 function Enter-Keypress {
     param (
         [string[]]$stratagemCode
@@ -144,13 +180,6 @@ function Enter-Keypress {
 
 
 # Main
-
-#wait time in milliseconds between keypresses
-$keypressWaitTime = 70
-
 if ($null -ne $code) {
     Enter-Keypress -stratagemCode $code
 }
-
-
- 
