@@ -15,22 +15,21 @@ param (
 $keypressWaitTime = 70
 $stratagesmDataFile = "stratagems.json"
 
-add-type -AssemblyName microsoft.VisualBasic
-add-type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName microsoft.VisualBasic
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName PresentationCore,PresentationFramework
 
 #Right now the stratagem list is hardcoded, but I intend to generate it dynamically by scraping data off a Wiki page and storing that in the stratagems.json file
 
-if ($update) {
-    Write-Host "Updating Stratagems"
+function Update-Json{
+	Write-Host "Updating Stratagems"
 
-    $StratagemHashTable = @{}
-
-    
+    $StratagemJson= @{}
+	$StratagemList = New-Object System.Collections.ArrayList
     
     #Copy-Item .\stratagems.json stratagems.json.bak
 
     $wikiURL = "https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2)"
-    #$wikiURL = "http://www.egyptianhieroglyphs.net/gardiners-sign-list/domestic-and-funerary-furniture/"
 
     #Invoke-WebRequest $wikiURL
     #(Invoke-WebRequest -Uri $wikiURL).Images | Select-Object src 
@@ -50,6 +49,7 @@ if ($update) {
             if ($cells[0].tagName -eq "TD") {
 
                 $cells[2].childNodes | Foreach-Object {
+					#Looks in the table cell that contains stratagem codes for images, and uses image name to determine direction
                     if ($_.className -eq 'image') { 
                         $arrowDirection = $_
 
@@ -78,51 +78,75 @@ if ($update) {
                     }
                 }
 
+				#Parse the HTML to determine info for each Stratagem
 
-                $name = @($cells[1] | ForEach-Object { ("" + $_.InnerText).Trim() })
-                
-                $coolDown = @($cells[3] | ForEach-Object { ("" + $_.InnerText).Trim() })
-                $uses = @($cells[4] | ForEach-Object { ("" + $_.InnerText).Trim() })
-                $activationTime = @($cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() })
+                $name = $cells[1] | ForEach-Object { ("" + $_.InnerText).Trim() }
+                $coolDown = $cells[3] | ForEach-Object { ("" + $_.InnerText).Trim() }
+                $uses = $cells[4] | ForEach-Object { ("" + $_.InnerText).Trim() }
+                $activationTime = $cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() }
+				#$activationTime = @($cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() })
+				
+				#This may not be super important, but, doing a bit of formatting on the strings
+				$name = $name.Replace('"',"")
+				$coolDown = $coolDown.Replace("seconds","").Replace("second","")
+				$activationTime = $activationTime.Replace("seconds","").Replace("second","")
+				
+				#$name = $name.Replace('"',"")
+				#$name = $name -replace '"',""
 
-                $info = @{
-                    'Alias'           = 'None'
-                    'Code'            = $inputCode
-                    'Cooldown'        = $coolDown
-                    'Uses'            = $uses
-                    'ActivationTime' = $activationTime
-                }
+				
 
-                $StratagemHashTable.Add($name,$info)
+                $StratagemList.Add(@{"Name"=$name;
+				"Alias"="";"Code"=$inputCode;
+				"Cooldown"=$coolDown;
+				"Uses"=$uses;
+				"ActivationTime"=$activationTime;})
+
                 continue
             }
         }
     }
 
+	$Stratagems = @{"Stratagems"=$StratagemList;}
+	$StratagemJson.Add("Democracy",$Stratagems)
+	$StratagemJson | ConvertTo-Json -Depth 10 | Out-File $stratagesmDataFile
 
-    foreach ($key in $StratagemHashTable.Keys) {
-
-        if($key -eq $strat){
-            Write-Host $key $StratagemHashTable.$key.Code -ForegroundColor Cyan
-            $StratagemHashTable.$key
+    foreach ($key in $StratagemJson.Democracy.Stratagems) {
+		
+        if($key.Name -eq $strat){
+            Write-Host $key.Name $key.Code -ForegroundColor Cyan
         }
-
-        $output = "$($key), $($StratagemHashTable.$key.Alias), $($StratagemHashTable.$key.Code), $($StratagemHashTable.$key.Cooldown), $($StratagemHashTable.$key.Uses), $($StratagemHashTable.$key.ActivationTime)"
-        $output | Add-Content "log.csv"
-    }  
-
-
-
+		
+    }
+}
+if ($update) {
+	Update-Json
 } 
 
-$stratagemCodeFile = (Get-Content $stratagesmDataFile -Raw) | ConvertFrom-Json
 
-$requestedCode = $stratagemCodeFile.stratagems | Where-Object { $_.Name -eq $strat }
+try {
+# This is there the script reads stratagems.json to check for the codes. If the file is missing, you get a popup
+# The datafile does NOT have to be generated this way, the -update command can be used when running the script
+	$stratagemCodeFile = (Get-Content $stratagesmDataFile -Raw -ErrorAction Stop) | ConvertFrom-Json
+	$requestedCode = $stratagemCodeFile.Democracy.Stratagems | Where-Object { $_.Name -eq $strat }
+	$code = $requestedCode.code
+}
+catch [System.Management.Automation.ItemNotFoundException]{
+	$ButtonType = [System.Windows.MessageBoxButton]::YesNoCancel
+	$MessageboxTitle = "No stratagem data file found!"
+	$Messageboxbody = "I can automatically generate the JSON file by accessing the internet and grabbing data from the Helldivers 2 Wiki, or you can download stratagams.json from the repo. May I attempt to generate the file now?"
+	$MessageIcon = [System.Windows.MessageBoxImage]::Warning
+	$Result = [System.Windows.MessageBox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
 
-$code = $requestedCode.code
+	if ($Result -eq "Yes"){
+		Write-Host "Downloading info from https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2)" -ForegroundColor Magenta
+		Update-Json
+	}
+
+}
 
 #Output the code for troubleshooting
-$code
+#$code
 function Enter-Keypress {
     param (
         [string[]]$stratagemCode
@@ -156,10 +180,6 @@ function Enter-Keypress {
 
 
 # Main
-
 if ($null -ne $code) {
     Enter-Keypress -stratagemCode $code
 }
-
-
- 
