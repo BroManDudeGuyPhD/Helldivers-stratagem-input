@@ -329,7 +329,6 @@ if ($terminal){
 
 if ($strat) {
     $code = Learn-Keypress -value $strat
-    $code
     if($code) {
         Enter-Keypress -stratagemCode $code
     }
