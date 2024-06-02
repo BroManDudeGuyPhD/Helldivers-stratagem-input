@@ -113,8 +113,6 @@ function Update-Json{
                 # However, "Eagle Rearm" will not have a unique alias value
                 $name = $name.Replace('"',"")
 
-
-                #$name = "AC-8 Autocannon"
                 if ($name.Contains("-")) {
                     $shortName = $name -split '-', 2;
                     $alias = $shortName[1] -split ' ', 2;
@@ -278,20 +276,20 @@ function Show-Menu {
 
 function terminal() {
     [System.Console]::Clear()
-    Write-Host "===============================================================================================================" -ForegroundColor DarkBlue
-    Write-Host @'
-     $$$$$$\              $$\                       $$$$$$\    $$\                         $$\     
-    $$  __$$\             $$ |                     $$  __$$\   $$ |                        $$ |    
-    $$ /  $$ |$$\   $$\ $$$$$$\    $$$$$$\         $$ /  \__|$$$$$$\    $$$$$$\  $$$$$$\ $$$$$$\   
-    $$$$$$$$ |$$ |  $$ |\_$$  _|  $$  __$$\ $$$$$$\\$$$$$$\  \_$$  _|  $$  __$$\ \____$$\\_$$  _|  
-    $$  __$$ |$$ |  $$ |  $$ |    $$ /  $$ |\______|\____$$\   $$ |    $$ |  \__|$$$$$$$ | $$ |    
-    $$ |  $$ |$$ |  $$ |  $$ |$$\ $$ |  $$ |       $$\   $$ |  $$ |$$\ $$ |     $$  __$$ | $$ |$$\ 
-    $$ |  $$ |\$$$$$$  |  \$$$$  |\$$$$$$  |       \$$$$$$  |  \$$$$  |$$ |     \$$$$$$$ | \$$$$  |
-    \__|  \__| \______/    \____/  \______/         \______/    \____/ \__|      \_______|  \____/  version 1.1                                                                                                                                                                                                                                                                                                  
-'@ -ForegroundColor Magenta
-
-    Write-Host "                                           Aiding Democracy since 2024" -ForegroundColor Cyan
-    Write-Host "===============================================================================================================" -ForegroundColor DarkBlue
+    Write-Host "|=============================================================================================================|" -ForegroundColor DarkBlue
+    Write-Host @'                                                                                                                
+|............$$$$$$\..............$$\.......................$$$$$$\....$$\.........................$$\........|
+|           $$  __$$\             $$ |                     $$  __$$\   $$ |                        $$ |       |
+|           $$ /  $$ |$$\   $$\ $$$$$$\    $$$$$$\         $$ /  \__|$$$$$$\    $$$$$$\  $$$$$$\ $$$$$$\      |
+|           $$$$$$$$ |$$ |  $$ |\_$$  _|  $$  __$$\ $$$$$$\\$$$$$$\  \_$$  _|  $$  __$$\ \____$$\\_$$  _|     |
+|           $$  __$$ |$$ |  $$ |  $$ |    $$ /  $$ |\______|\____$$\   $$ |    $$ |  \__|$$$$$$$ | $$ |       |
+|           $$ |  $$ |$$ |  $$ |  $$ |$$\ $$ |  $$ |       $$\   $$ |  $$ |$$\ $$ |     $$  __$$ | $$ |$$\    |
+|           $$ |  $$ |\$$$$$$  |..\$$$$  |\$$$$$$  |.......\$$$$$$  |..\$$$$  |$$ |.....\$$$$$$$ | \$$$$  |   |
+|...........\__|..\__|.\______/....\____/..\______/.........\______/....\____/.\__|......\_______|..\____/....|                                                                                                                                                                                                                                                                 
+'@.Trim() -ForegroundColor Magenta
+    Write-Host "|                                                                                                             |" -ForegroundColor Magenta
+    Write-Host "| Author: BroManDudeGuyPhD               Automated Stratagem Deployment                           version 1.1 |" -ForegroundColor Cyan
+    Write-Host "|----------------------------------------- Aiding Democracy since 2024 ---------------------------------------|" -ForegroundColor DarkBlue
 
     do {
         Show-Menu
@@ -306,7 +304,7 @@ function terminal() {
             } '3' {
                 'Coming soon Helldiver... go spread Democracy in the meantime'
             }'h'{
-                'If you are having trouble getting started, check out https://github.com/BroManDudeGuyPhD/Helldivers-stratagem-input'
+                'To execute stratagem input, run the script like automagic-democracy -strat "Autocannon". You may not see anything happen, but you can download a keyboard visualizer to check that it is working. If you are having trouble getting started, check out https://github.com/BroManDudeGuyPhD/Helldivers-stratagem-input'
             }
         }
         pause
@@ -323,13 +321,18 @@ if ($update) {
 	Update-Json
 } 
 
-if ($terminal){
+elseif ($terminal){
     terminal
 }
 
-if ($strat) {
+elseif ($strat) {
     $code = Learn-Keypress -value $strat
     if($code) {
         Enter-Keypress -stratagemCode $code
     }
 }
+
+else {
+    terminal
+}
+
