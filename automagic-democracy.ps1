@@ -63,6 +63,7 @@ function Update-Json{
     
     # At some point I want to implement customizable aliases for stratagems, this is a backup I've commented out for now since only the raw data is stored
     # Copy-Item .\stratagems.json stratagems.json.bak
+
     $wikiURL = "https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2)"
 
     $request = Invoke-WebRequest -Uri $wikiURL
@@ -154,6 +155,7 @@ function Update-Json{
 	$StratagemJson.Add("Democracy",$Stratagems)
 	$StratagemJson | ConvertTo-Json -Depth 10 | Out-File $stratagesmDataFile
 
+    <#
     foreach ($key in $StratagemJson.Democracy.Stratagems) {
 		
         if($key.Name -eq $strat -Or $key.Alias -eq $strat){
@@ -161,6 +163,8 @@ function Update-Json{
         }
 		
     }
+    #>
+
 }
 
 
@@ -264,11 +268,13 @@ function Get-Funky{
 
 function Show-Menu {
     Write-Host  " "
-    Write-Host "Testing Menu"
+    Write-Host "Main Menu"
+    Write-Host " "
     Write-Host "1: Search Stratagems" -ForegroundColor Cyan
     Write-Host "2: UPDATE Stratagems" -ForegroundColor Red
-    Write-Host "3: Stratagem Hero$([char]174) *COMING SOON*" -ForegroundColor Magenta
-    Write-Host "(Q)uit or (H)elp"
+    Write-Host "3: Configure Ship Modules " -ForegroundColor Cyan
+    Write-Host "4: Stratagem Hero$([char]174) *COMING SOON*" -ForegroundColor Magenta
+    Write-Host "(Q)uit - (H)elp - (M)enu"
     Write-Host  " "
 }
 
@@ -291,8 +297,8 @@ function terminal() {
     Write-Host "| Author: BroManDudeGuyPhD               Automated Stratagem Deployment                           version 1.1 |" -ForegroundColor Cyan
     Write-Host "|----------------------------------------- Aiding Democracy since 2024 ---------------------------------------|" -ForegroundColor DarkBlue
 
+    Show-Menu
     do {
-        Show-Menu
         $selection = Read-Host "Please make a selection"
         switch ($selection) {
             '1' {
@@ -303,11 +309,22 @@ function terminal() {
                 Update-Json
             } '3' {
                 'Coming soon Helldiver... go spread Democracy in the meantime'
+            }'4' {
+                'Ship Configuration coming soon Helldiver... go spread Democracy in the meantime'
             }'h'{
                 'To execute stratagem input, run the script like automagic-democracy -strat "Autocannon". You may not see anything happen, but you can download a keyboard visualizer to check that it is working. If you are having trouble getting started, check out https://github.com/BroManDudeGuyPhD/Helldivers-stratagem-input'
             }
+            'help'{
+                'To execute stratagem input, run the script like automagic-democracy -strat "Autocannon". You may not see anything happen, but you can download a keyboard visualizer to check that it is working. If you are having trouble getting started, check out https://github.com/BroManDudeGuyPhD/Helldivers-stratagem-input'
+            }
+            'm'{
+                Show-Menu
+            }
+            'menu'{
+                Show-Menu
+            }
         }
-        pause
+        
     }
     until ($selection -eq 'q')
 
