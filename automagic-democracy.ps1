@@ -165,6 +165,45 @@ function Update-Json{
     }
     #>
 
+    
+    $ModuleList = New-Object System.Collections.ArrayList
+    $ShipModuleJson= @{}
+    
+    $wikiURL = "https://helldivers.fandom.com/wiki/Super_Destroyer"
+    $moduleRequest = Invoke-WebRequest -Uri $wikiURL
+    $p = @($moduleRequest.ParsedHtml.getElementsByTagName("p") | Where-Object { $null -ne $_.InnerText})
+    $ul = @($moduleRequest.ParsedHtml.getElementsByTagName("ul") | Where-Object { $null -ne $_.InnerText})
+
+    $moduleNameAndDescription = @($p| Where-Object { $_.InnerText.Contains(":") -and $_.InnerHTML.contains("<B>")})
+    $moduleInfo = $ul.InnerText | Where-Object { $_.contains("Effect:")}
+
+    $moduleEffect = $moduleInfo -split 'Cost:';
+    #$moduleEffect
+
+    foreach($module in $moduleNameAndDescription){
+        $itterator = $moduleNameAndDescription.Count
+        $moduleName = $module.InnerText -split ':'
+        #$module.InnerText
+        
+        $ModuleList.Add(@{"Name"=$moduleName[0];
+        "Effect"=$moduleInfo[$itterator];})
+        
+    }
+
+    #$ModuleList
+
+
+    foreach ($module in $modules) {
+
+        $rows = @($table.Rows)
+        
+        foreach ($row in $rows) {
+
+        }
+    }
+
+    
+
 }
 
 
