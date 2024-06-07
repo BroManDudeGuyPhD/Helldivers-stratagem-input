@@ -56,7 +56,9 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName PresentationCore, PresentationFramework
 
 function Update-Json {
-    Write-Host "Updating Stratagems"
+    Write-Host""
+    Write-Host""
+    Write-Host "Updating Stratagems" -ForegroundColor Cyan
 
     $DataFileJson = @{}
     $StratagemList = New-Object System.Collections.ArrayList
@@ -170,19 +172,20 @@ function Update-Json {
     
     $wikiURL = "https://helldivers.fandom.com/wiki/Super_Destroyer"
     $moduleRequest = Invoke-WebRequest -Uri $wikiURL
-    $p = @($moduleRequest.ParsedHtml.getElementsByTagName("p") | Where-Object { $null -ne $_.InnerText })
-    $ul = @($moduleRequest.ParsedHtml.getElementsByTagName("ul") | Where-Object { $null -ne $_.InnerText })
 
-    $moduleNameAndDescription = @($p | Where-Object { $_.InnerText.Contains(":") -and $_.InnerHTML.contains("<B>") })
-    $moduleInfo = $ul.InnerText | Where-Object { $_.contains("Effect:") }
+    $moduleNameAndDescription = @($moduleRequest.ParsedHtml.getElementsByTagName("p") | Where-Object { $null -ne $_.InnerText })
+    $moduleInfo= @($moduleRequest.ParsedHtml.getElementsByTagName("ul") | Where-Object { $null -ne $_.InnerText })
+
+    $moduleNameAndDescription = @($moduleNameAndDescription | Where-Object { $_.InnerText.Contains(":") -and $_.InnerHTML.contains("<B>") })
+    $moduleInfo = $moduleInfo.InnerText | Where-Object { $_.contains("Effect:") }
     
     $iterator = 0
     foreach ($module in $moduleInfo) {
 
-        $moduleInfoSplit = $module -split 'Cost:';
-        $moduleEffect = $moduleInfoSplit[0].Replace("Effect: ", "").Replace('"', "").trim()
-        $moduleCost = $moduleInfoSplit[1].Replace(" Samples ", "").trim()
-        $moduleNameSplit = $moduleNameAndDescription[$itterator].InnerText -split ':'
+        $module = $module -split 'Cost:';
+        $moduleEffect = $module[0].Replace("Effect: ", "").Replace('"', "").trim()
+        $moduleCost = $module[1].Replace(" Samples ", "").trim()
+        $moduleNameSplit = $moduleNameAndDescription[$iterator].InnerText -split ':'
         $moduleName = $moduleNameSplit[0].trim()
         $moduleDescription = $moduleNameSplit[1].Replace('"', "").trim()
 
@@ -200,6 +203,11 @@ function Update-Json {
     $DataFileJson.Democracy += $Modules
     $DataFileJson | ConvertTo-Json -Depth 10 | Out-File $stratagesmDataFile  
 
+    Write-Host""
+    Write-Host""
+    Write-Host "Stratagems UPDATED" -ForegroundColor Cyan
+    Write-Host""
+    Write-Host""
 }
 
 
@@ -305,10 +313,10 @@ function Show-Menu {
     Write-Host "Main Menu"
     Write-Host " "
     Write-Host "1: Search Stratagems" -ForegroundColor Cyan
-    Write-Host "2: UPDATE Stratagems" -ForegroundColor Red
+    Write-Host "2: UPDATE Stratagems" -ForegroundColor Magenta
     Write-Host "3: Configure Ship Modules " -ForegroundColor Cyan
-    Write-Host "4: Stratagem Hero$([char]174) *COMING SOON*" -ForegroundColor Magenta
-    Write-Host "(Q)uit - (H)elp - (M)enu"
+    Write-Host "4: Stratagem Hero$([char]174) *COMING SOON*" -ForegroundColor Cyan
+    Write-Host "(Q)uit - (H)elp - (M)enu" -ForegroundColor White
     Write-Host  " "
 }
 
@@ -331,7 +339,7 @@ function terminal() {
 
     Show-Menu
     do {
-        $selection = Read-Host "Please make a selection"
+        $selection = Read-Host "Please make a selection" 
         switch ($selection) {
             '1' {
                 $enteredCode = Read-Host "Stratagem Name"
@@ -353,6 +361,9 @@ function terminal() {
                 Show-Menu
             }
             'menu' {
+                Show-Menu
+            }
+            ''{
                 Show-Menu
             }
         }
