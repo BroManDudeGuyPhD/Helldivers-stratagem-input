@@ -177,7 +177,7 @@ function Update-Json {
     $moduleNameAndDescription = @($p | Where-Object { $_.InnerText.Contains(":") -and $_.InnerHTML.contains("<B>") })
     $moduleInfo = $ul.InnerText | Where-Object { $_.contains("Effect:") }
     
-    $itterator = 0
+    $iterator = 0
     foreach ($module in $moduleInfo) {
 
         $moduleInfoSplit = $module -split 'Cost:';
@@ -193,7 +193,7 @@ function Update-Json {
                 "Cost"                 = $moduleCost;
             })
 
-        $itterator++
+        $iterator++
     }
 
     $Modules = @{"Ship Modules" = $ModuleList; }
