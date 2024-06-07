@@ -167,7 +167,6 @@ function Update-Json {
 
     
     $ModuleList = New-Object System.Collections.ArrayList
-    $ShipModuleJson = @{}
     
     $wikiURL = "https://helldivers.fandom.com/wiki/Super_Destroyer"
     $moduleRequest = Invoke-WebRequest -Uri $wikiURL
