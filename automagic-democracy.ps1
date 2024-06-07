@@ -35,31 +35,31 @@ https://github.com/BroManDudeGuyPhD/Helldivers-stratagem-input
 
 
 param (
-    [Alias("stratagem","code", "strategem")]
+    [Alias("stratagem", "code", "strategem")]
     [Parameter(Mandatory = $false)]
     [string]$strat,
 
     [Parameter(Mandatory = $false)]
     [switch]$update,
 
-    [Alias("test","testing", "help")]
+    [Alias("test", "testing", "help")]
     [Parameter(Mandatory = $false)]
     [switch]$terminal
 )
 
 # Wait time in milliseconds between keypresses
 $keypressWaitTime = 70
-$stratagesmDataFile = "stratagems.json"
+$stratagesmDataFile = "democracy.json"
 
 Add-Type -AssemblyName microsoft.VisualBasic
 Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName PresentationCore,PresentationFramework
+Add-Type -AssemblyName PresentationCore, PresentationFramework
 
-function Update-Json{
-	Write-Host "Updating Stratagems"
+function Update-Json {
+    Write-Host "Updating Stratagems"
 
-    $StratagemJson= @{}
-	$StratagemList = New-Object System.Collections.ArrayList
+    $DataFileJson = @{}
+    $StratagemList = New-Object System.Collections.ArrayList
     
     # At some point I want to implement customizable aliases for stratagems, this is a backup I've commented out for now since only the raw data is stored
     # Copy-Item .\stratagems.json stratagems.json.bak
@@ -79,7 +79,7 @@ function Update-Json{
             
             if ($cells[0].tagName -eq "TD") {
                 $cells[2].childNodes | Foreach-Object {
-					# Looks in the table cell that contains stratagem codes for images, and uses image name to determine direction
+                    # Looks in the table cell that contains stratagem codes for images, and uses image name to determine direction
                     if ($_.className -eq 'image') { 
                         $arrowDirection = $_
                         $arrowDirection = $arrowDirection.href
@@ -87,37 +87,37 @@ function Update-Json{
                         $temp = $splitArray[0]
                         $lastChar = $temp[-1]
 
-                        if($lastChar -match "U"){
-                            $inputCode+="U"
+                        if ($lastChar -match "U") {
+                            $inputCode += "U"
                         }
-                        elseif($lastChar -match "D"){
-                            $inputCode+="D"
+                        elseif ($lastChar -match "D") {
+                            $inputCode += "D"
                         }
-                        elseif($lastChar -match "L"){
-                            $inputCode+="L"
+                        elseif ($lastChar -match "L") {
+                            $inputCode += "L"
                         }
-                        elseif($lastChar -match "R"){
-                            $inputCode+="R"
+                        elseif ($lastChar -match "R") {
+                            $inputCode += "R"
                         }
                     }
                 }
 
-				# Parse the HTML to determine info for each Stratagem
+                # Parse the HTML to determine info for each Stratagem
                 $name = $cells[1] | ForEach-Object { ("" + $_.InnerText).Trim() }
                 $coolDown = $cells[3] | ForEach-Object { ("" + $_.InnerText).Trim() }
                 $uses = $cells[4] | ForEach-Object { ("" + $_.InnerText).Trim() }
                 $activationTime = $cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() }
-				# $activationTime = @($cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() })
+                # $activationTime = @($cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() })
 
                 # Stratagem Name formatting
                 # Some names are like AC-8 Autocannon. Alias trims that to "Autocannon"
                 # However, "Eagle Rearm" will not have a unique alias value
-                $name = $name.Replace('"',"")
+                $name = $name.Replace('"', "")
 
                 if ($name.Contains("-")) {
                     $shortName = $name -split '-', 2;
                     $alias = $shortName[1] -split ' ', 2;
-                    $alias = $alias[1..($alias.Length-1)]
+                    $alias = $alias[1..($alias.Length - 1)]
                     $alias
                 }
 
@@ -130,30 +130,30 @@ function Update-Json{
 
                 # Cooldown & Activation Time formatting
                 # Removes minute conversion, leaving only refferences to seconds
-				$coolDown = $coolDown.Replace("seconds","").Replace("second","")
+                $coolDown = $coolDown.Replace("seconds", "").Replace("second", "")
                 $cooolDownSeconds = $coolDown.Split("(");
                 $cooolDownSeconds = $cooolDownSeconds[0].Trim();
 
-				$activationTime = $activationTime.Replace("seconds","").Replace("second","")
-				$activationTimeSeconds = $activationTime.Split("("); 
+                $activationTime = $activationTime.Replace("seconds", "").Replace("second", "")
+                $activationTimeSeconds = $activationTime.Split("("); 
                 $activationTimeSeconds = $activationTimeSeconds[0].Trim();
 
                 # Adding all the parsed and formatted data to a List
-                $StratagemList.Add(@{"Name"=$name;
-				"Alias"= "$alias";
-                "Code"= $inputCode;
-				"Cooldown"= $cooolDownSeconds;
-				"Uses"= $uses;
-				"ActivationTime"= $activationTimeSeconds;})
+                [void]$StratagemList.Add(@{"Name" = $name;
+                        "Alias"                   = "$alias";
+                        "Code"                    = $inputCode;
+                        "Cooldown"                = $cooolDownSeconds;
+                        "Uses"                    = $uses;
+                        "ActivationTime"          = $activationTimeSeconds;
+                    })
 
                 continue
             }
         }
     }
 
-	$Stratagems = @{"Stratagems"=$StratagemList;}
-	$StratagemJson.Add("Democracy",$Stratagems)
-	$StratagemJson | ConvertTo-Json -Depth 10 | Out-File $stratagesmDataFile
+    $Stratagems = @{"Stratagems" = $StratagemList; }
+    $DataFileJson.Add("Democracy", $Stratagems)
 
     <#
     foreach ($key in $StratagemJson.Democracy.Stratagems) {
@@ -167,79 +167,76 @@ function Update-Json{
 
     
     $ModuleList = New-Object System.Collections.ArrayList
-    $ShipModuleJson= @{}
+    $ShipModuleJson = @{}
     
     $wikiURL = "https://helldivers.fandom.com/wiki/Super_Destroyer"
     $moduleRequest = Invoke-WebRequest -Uri $wikiURL
-    $p = @($moduleRequest.ParsedHtml.getElementsByTagName("p") | Where-Object { $null -ne $_.InnerText})
-    $ul = @($moduleRequest.ParsedHtml.getElementsByTagName("ul") | Where-Object { $null -ne $_.InnerText})
+    $p = @($moduleRequest.ParsedHtml.getElementsByTagName("p") | Where-Object { $null -ne $_.InnerText })
+    $ul = @($moduleRequest.ParsedHtml.getElementsByTagName("ul") | Where-Object { $null -ne $_.InnerText })
 
-    $moduleNameAndDescription = @($p| Where-Object { $_.InnerText.Contains(":") -and $_.InnerHTML.contains("<B>")})
-    $moduleInfo = $ul.InnerText | Where-Object { $_.contains("Effect:")}
-
-    $moduleEffect = $moduleInfo -split 'Cost:';
-    #$moduleEffect
-
-    foreach($module in $moduleNameAndDescription){
-        $itterator = $moduleNameAndDescription.Count
-        $moduleName = $module.InnerText -split ':'
-        #$module.InnerText
-        
-        $ModuleList.Add(@{"Name"=$moduleName[0];
-        "Effect"=$moduleInfo[$itterator];})
-        
-    }
-
-    #$ModuleList
-
-
-    foreach ($module in $modules) {
-
-        $rows = @($table.Rows)
-        
-        foreach ($row in $rows) {
-
-        }
-    }
-
+    $moduleNameAndDescription = @($p | Where-Object { $_.InnerText.Contains(":") -and $_.InnerHTML.contains("<B>") })
+    $moduleInfo = $ul.InnerText | Where-Object { $_.contains("Effect:") }
     
+    $itterator = 0
+    foreach ($module in $moduleInfo) {
 
-}
+        $moduleInfoSplit = $module -split 'Cost:';
+        $moduleEffect = $moduleInfoSplit[0].Replace("Effect: ", "").Replace('"', "").trim()
+        $moduleCost = $moduleInfoSplit[1].Replace(" Samples ", "").trim()
+        $moduleNameSplit = $moduleNameAndDescription[$itterator].InnerText -split ':'
+        $moduleName = $moduleNameSplit[0].trim()
+        $moduleDescription = $moduleNameSplit[1].Replace('"', "").trim()
 
+        [void]$ModuleList.Add(@{"Name" = $moduleName;
+                "Description"          = $moduleDescription;
+                "Effect"               = $moduleEffect;
+                "Cost"                 = $moduleCost;
+            })
 
-Function Learn-Keypress($value){
-try {
-	# This is there the script reads stratagems.json to check for the codes. If the file is missing, you get a popup
-	# The datafile does NOT have to be generated this way, the -update command can be used when running the script
-	
-    $value = $value.Replace('"',"") # Removes any quotes from parameter input
-    $stratagemCodeFile = (Get-Content $stratagesmDataFile -Raw -ErrorAction Stop) | ConvertFrom-Json
-	$requestedCode = $stratagemCodeFile.Democracy.Stratagems | Where-Object { $_.Name -eq $value -or $_.Alias -eq $value }
-
-    if($null -eq $requestedCode){
-        $requestedCode = $stratagemCodeFile.Democracy.Stratagems | Where-Object { $_.Name.contains($value) -or $_.Alias.contains($value) }
-
-        if($null -eq $requestedCode){
-            return "No Stratagems matching $($value)"
-        }
-        return $requestedCode
+        $itterator++
     }
 
-	return $requestedCode.code
-}
-catch [System.Management.Automation.ItemNotFoundException] {
-	$ButtonType = [System.Windows.MessageBoxButton]::YesNoCancel
-	$MessageboxTitle = "No stratagem data file found!"
-	$Messageboxbody = "I can automatically generate the JSON file by accessing the internet and grabbing data from the Helldivers 2 Wiki, or you can download stratagams.json from the repo. May I attempt to generate the file now?"
-	$MessageIcon = [System.Windows.MessageBoxImage]::Warning
-	$Result = [System.Windows.MessageBox]::Show($Messageboxbody, $MessageboxTitle, $ButtonType, $MessageIcon)
-
-	if ($Result -eq "Yes") {
-		Write-Host "Downloading info from https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2)" -ForegroundColor Magenta
-		Update-Json
-	}
+    $Modules = @{"Ship Modules" = $ModuleList; }
+    #$DataFileJson.Add("Democracy",$Modules)
+    $DataFileJson.Democracy += $Modules
+    $DataFileJson | ConvertTo-Json -Depth 10 | Out-File $stratagesmDataFile  
 
 }
+
+
+Function Learn-Keypress($value) {
+    try {
+        # This is there the script reads stratagems.json to check for the codes. If the file is missing, you get a popup
+        # The datafile does NOT have to be generated this way, the -update command can be used when running the script
+	
+        $value = $value.Replace('"', "") # Removes any quotes from parameter input
+        $stratagemCodeFile = (Get-Content $stratagesmDataFile -Raw -ErrorAction Stop) | ConvertFrom-Json
+        $requestedCode = $stratagemCodeFile.Democracy.Stratagems | Where-Object { $_.Name -eq $value -or $_.Alias -eq $value }
+
+        if ($null -eq $requestedCode) {
+            $requestedCode = $stratagemCodeFile.Democracy.Stratagems | Where-Object { $_.Name.contains($value) -or $_.Alias.contains($value) }
+
+            if ($null -eq $requestedCode) {
+                return "No Stratagems matching $($value)"
+            }
+            return $requestedCode
+        }
+
+        return $requestedCode.code
+    }
+    catch [System.Management.Automation.ItemNotFoundException] {
+        $ButtonType = [System.Windows.MessageBoxButton]::YesNoCancel
+        $MessageboxTitle = "No stratagem data file found!"
+        $Messageboxbody = "I can automatically generate the JSON file by accessing the internet and grabbing data from the Helldivers 2 Wiki, or you can download democracy.json from the repo. May I attempt to generate the file now?"
+        $MessageIcon = [System.Windows.MessageBoxImage]::Warning
+        $Result = [System.Windows.MessageBox]::Show($Messageboxbody, $MessageboxTitle, $ButtonType, $MessageIcon)
+
+        if ($Result -eq "Yes") {
+            Write-Host "Downloading info from https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2)" -ForegroundColor Magenta
+            Update-Json
+        }
+
+    }
 }
 
 # Output the code for troubleshooting
@@ -272,35 +269,34 @@ function Enter-Keypress {
     }
 }
 
-function Get-Funky{
+function Get-Funky {
     # Written by Matt
     # https://stackoverflow.com/questions/35022078/how-do-i-output-ascii-art-to-console
     param([string]$Text)
 
     # Use a random colour for each character
-    $Text.ToCharArray() | ForEach-Object{
-        switch -Regex ($_){
+    $Text.ToCharArray() | ForEach-Object {
+        switch -Regex ($_) {
             # Ignore new line characters
-            "`r"{
+            "`r" {
                 break
             }
             # Start a new line
-            "`n"{
-                Write-Host " ";break
+            "`n" {
+                Write-Host " "; break
             }
             # Use random colours for displaying this non-space character
-            "[^ ]"{
+            "[^ ]" {
                 # Splat the colours to write-host
                 $writeHostOptions = @{
                     ForegroundColor = ([system.enum]::GetValues([system.consolecolor])) | get-random
                     # BackgroundColor = ([system.enum]::GetValues([system.consolecolor])) | get-random
-                    NoNewLine = $true
+                    NoNewLine       = $true
                 }
                 Write-Host $_ @writeHostOptions
                 break
             }
-            " "{Write-Host " " -NoNewline}
-
+            " " { Write-Host " " -NoNewline }
         } 
     }
 }
@@ -316,8 +312,6 @@ function Show-Menu {
     Write-Host "(Q)uit - (H)elp - (M)enu"
     Write-Host  " "
 }
-
-
 
 function terminal() {
     [System.Console]::Clear()
@@ -350,16 +344,16 @@ function terminal() {
                 'Coming soon Helldiver... go spread Democracy in the meantime'
             }'4' {
                 'Ship Configuration coming soon Helldiver... go spread Democracy in the meantime'
-            }'h'{
+            }'h' {
                 'To execute stratagem input, run the script like automagic-democracy -strat "Autocannon". You may not see anything happen, but you can download a keyboard visualizer to check that it is working. If you are having trouble getting started, check out https://github.com/BroManDudeGuyPhD/Helldivers-stratagem-input'
             }
-            'help'{
+            'help' {
                 'To execute stratagem input, run the script like automagic-democracy -strat "Autocannon". You may not see anything happen, but you can download a keyboard visualizer to check that it is working. If you are having trouble getting started, check out https://github.com/BroManDudeGuyPhD/Helldivers-stratagem-input'
             }
-            'm'{
+            'm' {
                 Show-Menu
             }
-            'menu'{
+            'menu' {
                 Show-Menu
             }
         }
@@ -374,16 +368,16 @@ function terminal() {
 # Main
 
 if ($update) {
-	Update-Json
+    Update-Json
 } 
 
-elseif ($terminal){
+elseif ($terminal) {
     terminal
 }
 
 elseif ($strat) {
     $code = Learn-Keypress -value $strat
-    if($code) {
+    if ($code) {
         Enter-Keypress -stratagemCode $code
     }
 }
