@@ -55,10 +55,112 @@ Add-Type -AssemblyName microsoft.VisualBasic
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName PresentationCore, PresentationFramework
 
+# Text values for vanity menus
+$MenuVertical = "||";
+$MenuHorizontal = "=";
+function Vanity-NewLine ($lines){
+    for ($i = 0; $i -lt $lines; $i++) {
+        Vanity-Text $MenuVertical
+    }
+}
+function Vanity-Text ($text, $ForegroundColor, $BackgroundColor){
+    $SplitText = $text.ToCharArray();
+
+    foreach ($char in $SplitText){
+        
+        if($null -eq $ForegroundColor){
+            $ForegroundColor = "Green"
+        }
+
+        if($null -eq $BackgroundColor){
+            $BackgroundColor = "Black"
+        }
+
+        Write-Host $char -NoNewline -ForegroundColor $ForegroundColor -BackgroundColor $BackgroundColor
+
+
+        #Vanity delay for typing effect
+
+        if ($char -eq "."){
+            if($SplitText.Length -eq 1){
+                Start-Sleep -Milliseconds 20  
+            }
+            else{
+                Start-Sleep -Milliseconds 50
+            }
+        }
+
+        # Menu characters
+        elseif ($char -eq " ") {
+            Start-Sleep -Milliseconds 0.5
+        }
+        elseif($char -eq $MenuVertical){
+            Start-Sleep -Milliseconds 110
+        }
+        elseif($char -eq $MenuHorizontal){
+            Start-Sleep -Milliseconds 110
+        }
+
+        # Normal Condition
+        else{
+            Start-Sleep -Milliseconds 1
+        }
+        
+    }
+    Write-Host""
+}
+
+function Vanity-Logo($text, $ForegroundColor, $BackgroundColor){
+    $SplitText = $text.ToCharArray();
+    $previousValue = "";
+    foreach ($char in $SplitText){
+        
+        if($null -eq $ForegroundColor){
+            $ForegroundColor = "Green"
+        }
+
+        if($null -eq $BackgroundColor){
+            $BackgroundColor = ""
+        }
+
+        if($char -eq "|"){
+            if($previousValue -eq "="){
+                Write-Host $char -ForegroundColor $ForegroundColor
+            }
+
+            else{
+                Write-Host $char -NoNewline -ForegroundColor $ForegroundColor
+            }
+        }
+        else{
+            Write-Host $char -NoNewline -ForegroundColor $ForegroundColor
+        }
+
+        #Vanity delay for typing effect
+        if ($char -eq "."){
+            Start-Sleep -Milliseconds 1
+        }
+        elseif ($char -eq " ") {
+            Start-Sleep -Milliseconds 0
+        }
+        else{
+            Start-Sleep -Milliseconds 5
+        }
+        $previousValue = $char
+    }
+    Write-Host""
+}
+
 function Update-Json {
-    Write-Host""
-    Write-Host""
-    Write-Host "Updating Stratagems" -ForegroundColor Cyan
+    Vanity-NewLine 1
+    Vanity-Text "$MenuVertical- Updating Stratagems" -ForegroundColor Green
+    
+
+    # Backup existing stratagems
+    $date = Get-Date -Format "yyyyMMdd_hhmmss"
+    Vanity-NewLine 3
+    Vanity-Text "$MenuVertical----- Backing Up Files" -ForegroundColor Green
+    Copy-Item $stratagesmDataFile -Destination democracy-backup$date.json
 
     $DataFileJson = @{}
     $StratagemList = New-Object System.Collections.ArrayList
@@ -66,96 +168,97 @@ function Update-Json {
     # At some point I want to implement customizable aliases for stratagems, this is a backup I've commented out for now since only the raw data is stored
     # Copy-Item .\stratagems.json stratagems.json.bak
 
-    $wikiURL = "https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2)"
+    try {
+        $wikiURL = "https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2)"
 
-    $request = Invoke-WebRequest -Uri $wikiURL
-    $tables = @($request.ParsedHtml.getElementsByTagName("TABLE"))
+        $request = Invoke-WebRequest -Uri $wikiURL
+        $tables = @($request.ParsedHtml.getElementsByTagName("TABLE"))
 
-    foreach ($table in $tables) {
+        foreach ($table in $tables) {
 
-        $rows = @($table.Rows)
+            $rows = @($table.Rows)
         
-        foreach ($row in $rows) {
-            $inputCode = ""
-            $cells = @($row.Cells)
+            foreach ($row in $rows) {
+                $inputCode = ""
+                $cells = @($row.Cells)
             
-            if ($cells[0].tagName -eq "TD") {
-                $cells[2].childNodes | Foreach-Object {
-                    # Looks in the table cell that contains stratagem codes for images, and uses image name to determine direction
-                    if ($_.className -eq 'image') { 
-                        $arrowDirection = $_
-                        $arrowDirection = $arrowDirection.href
-                        $splitArray = $arrowDirection -split '.png'
-                        $temp = $splitArray[0]
-                        $lastChar = $temp[-1]
+                if ($cells[0].tagName -eq "TD") {
+                    $cells[2].childNodes | Foreach-Object {
+                        # Looks in the table cell that contains stratagem codes for images, and uses image name to determine direction
+                        if ($_.className -eq 'image') { 
+                            $arrowDirection = $_
+                            $arrowDirection = $arrowDirection.href
+                            $splitArray = $arrowDirection -split '.png'
+                            $temp = $splitArray[0]
+                            $lastChar = $temp[-1]
 
-                        if ($lastChar -match "U") {
-                            $inputCode += "U"
-                        }
-                        elseif ($lastChar -match "D") {
-                            $inputCode += "D"
-                        }
-                        elseif ($lastChar -match "L") {
-                            $inputCode += "L"
-                        }
-                        elseif ($lastChar -match "R") {
-                            $inputCode += "R"
+                            if ($lastChar -match "U") {
+                                $inputCode += "U"
+                            }
+                            elseif ($lastChar -match "D") {
+                                $inputCode += "D"
+                            }
+                            elseif ($lastChar -match "L") {
+                                $inputCode += "L"
+                            }
+                            elseif ($lastChar -match "R") {
+                                $inputCode += "R"
+                            }
                         }
                     }
+
+                    # Parse the HTML to determine info for each Stratagem
+                    $name = $cells[1] | ForEach-Object { ("" + $_.InnerText).Trim() }
+                    $coolDown = $cells[3] | ForEach-Object { ("" + $_.InnerText).Trim() }
+                    $uses = $cells[4] | ForEach-Object { ("" + $_.InnerText).Trim() }
+                    $activationTime = $cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() }
+                    # $activationTime = @($cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() })
+
+                    # Stratagem Name formatting
+                    # Some names are like AC-8 Autocannon. Alias trims that to "Autocannon"
+                    # However, "Eagle Rearm" will not have a unique alias value
+                    $name = $name.Replace('"', "")
+
+                    if ($name.Contains("-")) {
+                        $shortName = $name -split '-', 2;
+                        $alias = $shortName[1] -split ' ', 2;
+                        $alias = $alias[1..($alias.Length - 1)]
+                        $alias
+                    }
+
+                    # If there is no need for an alias, just fill in alias falue with name to prevent search issues
+                    else {
+                        $alias = $name;
+                        $name
+                    }
+
+
+                    # Cooldown & Activation Time formatting
+                    # Removes minute conversion, leaving only refferences to seconds
+                    $coolDown = $coolDown.Replace("seconds", "").Replace("second", "")
+                    $cooolDownSeconds = $coolDown.Split("(");
+                    $cooolDownSeconds = $cooolDownSeconds[0].Trim();
+
+                    $activationTime = $activationTime.Replace("seconds", "").Replace("second", "")
+                    $activationTimeSeconds = $activationTime.Split("("); 
+                    $activationTimeSeconds = $activationTimeSeconds[0].Trim();
+
+                    # Adding all the parsed and formatted data to a List
+                    [void]$StratagemList.Add(@{"Name" = $name;
+                            "Alias"                   = "$alias";
+                            "Code"                    = $inputCode;
+                            "Cooldown"                = $cooolDownSeconds;
+                            "Uses"                    = $uses;
+                            "ActivationTime"          = $activationTimeSeconds;
+                        })
+
+                    continue
                 }
-
-                # Parse the HTML to determine info for each Stratagem
-                $name = $cells[1] | ForEach-Object { ("" + $_.InnerText).Trim() }
-                $coolDown = $cells[3] | ForEach-Object { ("" + $_.InnerText).Trim() }
-                $uses = $cells[4] | ForEach-Object { ("" + $_.InnerText).Trim() }
-                $activationTime = $cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() }
-                # $activationTime = @($cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() })
-
-                # Stratagem Name formatting
-                # Some names are like AC-8 Autocannon. Alias trims that to "Autocannon"
-                # However, "Eagle Rearm" will not have a unique alias value
-                $name = $name.Replace('"', "")
-
-                if ($name.Contains("-")) {
-                    $shortName = $name -split '-', 2;
-                    $alias = $shortName[1] -split ' ', 2;
-                    $alias = $alias[1..($alias.Length - 1)]
-                    $alias
-                }
-
-                # If there is no need for an alias, just fill in alias falue with name to prevent search issues
-                else {
-                    $alias = $name;
-                    $name
-                }
-
-
-                # Cooldown & Activation Time formatting
-                # Removes minute conversion, leaving only refferences to seconds
-                $coolDown = $coolDown.Replace("seconds", "").Replace("second", "")
-                $cooolDownSeconds = $coolDown.Split("(");
-                $cooolDownSeconds = $cooolDownSeconds[0].Trim();
-
-                $activationTime = $activationTime.Replace("seconds", "").Replace("second", "")
-                $activationTimeSeconds = $activationTime.Split("("); 
-                $activationTimeSeconds = $activationTimeSeconds[0].Trim();
-
-                # Adding all the parsed and formatted data to a List
-                [void]$StratagemList.Add(@{"Name" = $name;
-                        "Alias"                   = "$alias";
-                        "Code"                    = $inputCode;
-                        "Cooldown"                = $cooolDownSeconds;
-                        "Uses"                    = $uses;
-                        "ActivationTime"          = $activationTimeSeconds;
-                    })
-
-                continue
             }
         }
-    }
 
-    $Stratagems = @{"Stratagems" = $StratagemList; }
-    $DataFileJson.Add("Democracy", $Stratagems)
+        $Stratagems = @{"Stratagems" = $StratagemList; }
+        $DataFileJson.Add("Democracy", $Stratagems)
 
     <#
     foreach ($key in $StratagemJson.Democracy.Stratagems) {
@@ -205,9 +308,22 @@ function Update-Json {
 
     Write-Host""
     Write-Host""
-    Write-Host "Stratagems UPDATED" -ForegroundColor Cyan
+    Vanity-Text "Stratagems UPDATED" -ForegroundColor Cyan
     Write-Host""
     Write-Host""
+}
+
+catch {
+    # Catch any error
+    Vanity-NewLine 3
+    Vanity-Text "║----- An error occurred... restoring backup" -ForegroundColor Red
+    # Backup existing stratagems 
+    Remove-Item $stratagesmDataFile
+    Rename-Item democracy-backup$date.json -NewName $stratagesmDataFile
+    Vanity-NewLine 3
+    Vanity-Text "Backup RESTORED" -BackgroundColor Green -ForegroundColor Cyan
+}
+
 }
 
 
@@ -309,8 +425,8 @@ function Get-Funky {
 }
 
 function Show-Menu {
-    Write-Host  " "
-    Write-Host "Main Menu"
+    Write-Host  ""
+    Vanity-Text "Main Menu"
     Write-Host " "
     Write-Host "1: Search Stratagems" -ForegroundColor Cyan
     Write-Host "2: UPDATE Stratagems" -ForegroundColor Magenta
@@ -322,20 +438,20 @@ function Show-Menu {
 
 function terminal() {
     [System.Console]::Clear()
-    Write-Host "|=============================================================================================================|" -ForegroundColor DarkBlue
-    Write-Host @'                                                                                                                
-|............$$$$$$\..............$$\.......................$$$$$$\....$$\.........................$$\........|
-|           $$  __$$\             $$ |                     $$  __$$\   $$ |                        $$ |       |
-|           $$ /  $$ |$$\   $$\ $$$$$$\    $$$$$$\         $$ /  \__|$$$$$$\    $$$$$$\  $$$$$$\ $$$$$$\      |
-|           $$$$$$$$ |$$ |  $$ |\_$$  _|  $$  __$$\ $$$$$$\\$$$$$$\  \_$$  _|  $$  __$$\ \____$$\\_$$  _|     |
-|           $$  __$$ |$$ |  $$ |  $$ |    $$ /  $$ |\______|\____$$\   $$ |    $$ |  \__|$$$$$$$ | $$ |       |
-|           $$ |  $$ |$$ |  $$ |  $$ |$$\ $$ |  $$ |       $$\   $$ |  $$ |$$\ $$ |     $$  __$$ | $$ |$$\    |
-|           $$ |  $$ |\$$$$$$  |..\$$$$  |\$$$$$$  |.......\$$$$$$  |..\$$$$  |$$ |.....\$$$$$$$ | \$$$$  |   |
-|...........\__|..\__|.\______/....\____/..\______/.........\______/....\____/.\__|......\_______|..\____/....|                                                                                                                                                                                                                                                                 
+    Write-Host "|------------------------------------------------------------------------------------------------------------- |" -ForegroundColor DarkBlue
+    Vanity-Logo @'                                                                                                                
+|            $$$$$$\              $$\                       $$$$$$\    $$\                         $$\         |
+|           $$  __$$\             $$ |                     $$  __$$\   $$ |                        $$ |        |
+|           $$ /  $$ |$$\   $$\ $$$$$$\    $$$$$$\         $$ /  \__|$$$$$$\    $$$$$$\  $$$$$$\ $$$$$$\       |
+|           $$$$$$$$ |$$ |  $$ |\_$$  _|  $$  __$$\ $$$$$$\\$$$$$$\  \_$$  _|  $$  __$$\ \____$$\\_$$  _|      |
+|           $$  __$$ |$$ |  $$ |  $$ |    $$ /  $$ |\______|\____$$\   $$ |    $$ |  \__|$$$$$$$ | $$ |        |
+|           $$ |  $$ |$$ |  $$ |  $$ |$$\ $$ |  $$ |       $$\   $$ |  $$ |$$\ $$ |     $$  __$$ | $$ |$$\     |
+|           $$ |  $$ |\$$$$$$  |..\$$$$  |\$$$$$$  |.......\$$$$$$  |..\$$$$  |$$ |.....\$$$$$$$ | \$$$$  |    |
+|...........\__|..\__|.\______/....\____/..\______/.........\______/....\____/.\__|......\_______|..\____/.... |                                                                                                                                                                                                                                                                 
 '@.Trim() -ForegroundColor Magenta
-    Write-Host "|                                                                                                             |" -ForegroundColor Magenta
-    Write-Host "| Author: BroManDudeGuyPhD               Automated Stratagem Deployment                           version 1.1 |" -ForegroundColor Cyan
-    Write-Host "|----------------------------------------- Aiding Democracy since 2024 ---------------------------------------|" -ForegroundColor DarkBlue
+Vanity-Text "|                                                                                                              |" -ForegroundColor Magenta
+Vanity-Logo "| Author: BroManDudeGuyPhD               Automated Stratagem Deployment                           version 1.2  |" -ForegroundColor Cyan
+Vanity-Logo "|----------------------------------------- Aiding Democracy since 2024 --------------------------------------- |" -ForegroundColor Magenta
 
     Show-Menu
     do {
