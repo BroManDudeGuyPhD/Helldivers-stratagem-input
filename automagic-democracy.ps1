@@ -56,14 +56,27 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName PresentationCore, PresentationFramework
 
 # Text values for vanity menus
-$MenuVertical = "||";
-$MenuHorizontal = "=";
+$MenuVertical = "█";
+$MenuHorizontal = "━";
 function Vanity-NewLine ($lines){
     for ($i = 0; $i -lt $lines; $i++) {
         Vanity-Text $MenuVertical
     }
 }
-function Vanity-Text ($text, $ForegroundColor, $BackgroundColor){
+
+function Vanity-Tab ($lines, $ForegroundColor){
+
+    if($null -eq $ForegroundColor){
+        $ForegroundColor = "Green"
+    }
+
+    Vanity-Text -text $MenuVertical -ForegroundColor $ForegroundColor -NoReset $true
+
+    for ($i = 0; $i -lt $lines; $i++) {
+        Vanity-Text -text $MenuHorizontal -ForegroundColor $ForegroundColor -NoReset $true
+    }
+}
+function Vanity-Text ($text, $ForegroundColor, $BackgroundColor, [bool]$NoReset){
     $SplitText = $text.ToCharArray();
 
     foreach ($char in $SplitText){
@@ -103,11 +116,17 @@ function Vanity-Text ($text, $ForegroundColor, $BackgroundColor){
 
         # Normal Condition
         else{
-            Start-Sleep -Milliseconds 1
+            Start-Sleep -Milliseconds 160
         }
         
     }
-    Write-Host""
+    
+    if($NoReset -eq $true){
+        return
+    }
+
+    Write-Host ""
+
 }
 
 function Vanity-Logo($text, $ForegroundColor, $BackgroundColor){
@@ -138,13 +157,13 @@ function Vanity-Logo($text, $ForegroundColor, $BackgroundColor){
 
         #Vanity delay for typing effect
         if ($char -eq "."){
-            Start-Sleep -Milliseconds 1
+            Start-Sleep -Milliseconds 10
         }
         elseif ($char -eq " ") {
             Start-Sleep -Milliseconds 0
         }
         else{
-            Start-Sleep -Milliseconds 5
+            Start-Sleep -Milliseconds 0
         }
         $previousValue = $char
     }
@@ -152,14 +171,16 @@ function Vanity-Logo($text, $ForegroundColor, $BackgroundColor){
 }
 
 function Update-Json {
-    Vanity-NewLine 1
-    Vanity-Text "$MenuVertical- Updating Stratagems" -ForegroundColor Green
+    Vanity-NewLine 2
+    Vanity-Tab 4
+    Vanity-Text " Updating Stratagems" -ForegroundColor Green
     
 
     # Backup existing stratagems
     $date = Get-Date -Format "yyyyMMdd_hhmmss"
-    Vanity-NewLine 3
-    Vanity-Text "$MenuVertical----- Backing Up Files" -ForegroundColor Green
+    Vanity-NewLine 2
+    Vanity-Tab 8
+    Vanity-Text " Backing Up Files" -ForegroundColor Green
     Copy-Item $stratagesmDataFile -Destination democracy-backup$date.json
 
     $DataFileJson = @{}
@@ -306,22 +327,27 @@ function Update-Json {
     $DataFileJson.Democracy += $Modules
     $DataFileJson | ConvertTo-Json -Depth 10 | Out-File $stratagesmDataFile  
 
-    Write-Host""
-    Write-Host""
+    Vanity-NewLine 2
+    Vanity-Tab 4 -ForegroundColor Cyan
     Vanity-Text "Stratagems UPDATED" -ForegroundColor Cyan
     Write-Host""
     Write-Host""
+    Show-Menu
 }
 
 catch {
     # Catch any error
-    Vanity-NewLine 3
-    Vanity-Text "║----- An error occurred... restoring backup" -ForegroundColor Red
+    Vanity-NewLine 2
+    Vanity-Tab 8 -ForegroundColor Red
+    Vanity-Text " An error occurred... restoring backup" -ForegroundColor Red
     # Backup existing stratagems 
     Remove-Item $stratagesmDataFile
     Rename-Item democracy-backup$date.json -NewName $stratagesmDataFile
-    Vanity-NewLine 3
-    Vanity-Text "Backup RESTORED" -BackgroundColor Green -ForegroundColor Cyan
+    Vanity-NewLine 2
+    Vanity-Tab 4
+    Vanity-Text " Backup RESTORED " -BackgroundColor Green -ForegroundColor Cyan
+
+    Show-Menu
 }
 
 }
@@ -449,7 +475,7 @@ function terminal() {
 |           $$ |  $$ |\$$$$$$  |..\$$$$  |\$$$$$$  |.......\$$$$$$  |..\$$$$  |$$ |.....\$$$$$$$ | \$$$$  |    |
 |...........\__|..\__|.\______/....\____/..\______/.........\______/....\____/.\__|......\_______|..\____/.... |                                                                                                                                                                                                                                                                 
 '@.Trim() -ForegroundColor Magenta
-Vanity-Text "|                                                                                                              |" -ForegroundColor Magenta
+Vanity-Logo "|                                                                                                              |" -ForegroundColor Magenta
 Vanity-Logo "| Author: BroManDudeGuyPhD               Automated Stratagem Deployment                           version 1.2  |" -ForegroundColor Cyan
 Vanity-Logo "|----------------------------------------- Aiding Democracy since 2024 --------------------------------------- |" -ForegroundColor Magenta
 
