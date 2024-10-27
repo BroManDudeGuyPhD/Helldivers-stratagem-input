@@ -108,15 +108,15 @@ function Vanity-Text ($text, $ForegroundColor, $BackgroundColor, [bool]$NoReset)
             Start-Sleep -Milliseconds 0.5
         }
         elseif($char -eq $MenuVertical){
-            Start-Sleep -Milliseconds 110
+            Start-Sleep -Milliseconds 50
         }
         elseif($char -eq $MenuHorizontal){
-            Start-Sleep -Milliseconds 110
+            Start-Sleep -Milliseconds 90
         }
 
         # Normal Condition
         else{
-            Start-Sleep -Milliseconds 160
+            Start-Sleep -Milliseconds 60
         }
         
     }
