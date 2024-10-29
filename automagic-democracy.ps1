@@ -22,6 +22,9 @@ Fetches paramater names and codes from online Wiki
 .PARAMETER terminal
 Opens up an interactive terminal
 
+.PARAMETER setup
+Runs setup function
+
 .OUTPUTS
 Will create stratagems.json if not already present in home directory. 
 This is parsed data from the Helldivers 2 wiki at https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2 
@@ -39,6 +42,10 @@ param (
     [Parameter(Mandatory = $false)]
     [string]$strat,
 
+    [Alias("init", "initialize")]
+    [Parameter(Mandatory = $false)]
+    [string]$setup,
+
     [Parameter(Mandatory = $false)]
     [switch]$update,
 
@@ -55,12 +62,17 @@ Add-Type -AssemblyName microsoft.VisualBasic
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName PresentationCore, PresentationFramework
 
-# Text values for vanity menus
+# The following are all "vanity" functions, and will have a setting to disable them in the future. They serve no function other than being pretty
+
 $MenuVertical = "█";
 $MenuHorizontal = "━";
-function Vanity-NewLine ($lines){
+function Vanity-NewLine ($lines, $ForegroundColor){
+    if($null -eq $ForegroundColor){
+        $ForegroundColor = "Green"
+    }
+
     for ($i = 0; $i -lt $lines; $i++) {
-        Vanity-Text $MenuVertical
+        Vanity-Text $MenuVertical -ForegroundColor $ForegroundColor
     }
 }
 
@@ -75,8 +87,9 @@ function Vanity-Tab ($lines, $ForegroundColor){
     for ($i = 0; $i -lt $lines; $i++) {
         Vanity-Text -text $MenuHorizontal -ForegroundColor $ForegroundColor -NoReset $true
     }
+    Vanity-Text -text " "-NoReset $true
 }
-function Vanity-Text ($text, $ForegroundColor, $BackgroundColor, [bool]$NoReset){
+function Vanity-Text ($text, $ForegroundColor, $BackgroundColor, [bool]$NoReset, [bool]$SkipTyping){
     $SplitText = $text.ToCharArray();
 
     foreach ($char in $SplitText){
@@ -101,6 +114,10 @@ function Vanity-Text ($text, $ForegroundColor, $BackgroundColor, [bool]$NoReset)
             else{
                 Start-Sleep -Milliseconds 50
             }
+        }
+
+        elseif($SkipTyping -eq $true){
+            Start-Sleep -Milliseconds 0
         }
 
         # Menu characters
@@ -168,6 +185,24 @@ function Vanity-Logo($text, $ForegroundColor, $BackgroundColor){
         $previousValue = $char
     }
     Write-Host""
+}
+
+
+# Main Script Functions
+
+function Setup {
+    <#  Runs setup to make sure system will support script functions, mainly the vanity stuff for now
+        For vanity to work, UTF-8 must be enabled or the terminal will output giberish for some of the characters used to form menus
+        The workaround is basically:
+            1. open intl.cpl from the Run program 
+            2. Choose Administrative menu
+            3. Change system locale
+            4. Check "Beta; Use Unicode UTF-8 for worldwide language support"
+            5. Restart computer
+        https://www.delftstack.com/howto/powershell/powershell-utf-8-encoding-chcp-65001/#google_vignette  #>
+
+    Write-Host "You should see a vertical bar here: $MenuVertical"
+    Write-Host "You should see a horizontal bar here: $MenuHorizontal"
 }
 
 function Update-Json {
@@ -330,8 +365,8 @@ function Update-Json {
     Vanity-NewLine 2
     Vanity-Tab 4 -ForegroundColor Cyan
     Vanity-Text "Stratagems UPDATED" -ForegroundColor Cyan
-    Write-Host""
-    Write-Host""
+    Vanity-NewLine 2
+    Vanity-Tab 4
     Show-Menu
 }
 
@@ -346,7 +381,6 @@ catch {
     Vanity-NewLine 2
     Vanity-Tab 4
     Vanity-Text " Backup RESTORED " -BackgroundColor Green -ForegroundColor Cyan
-
     Show-Menu
 }
 
@@ -451,15 +485,19 @@ function Get-Funky {
 }
 
 function Show-Menu {
-    Write-Host  ""
-    Vanity-Text "Main Menu"
-    Write-Host " "
-    Write-Host "1: Search Stratagems" -ForegroundColor Cyan
-    Write-Host "2: UPDATE Stratagems" -ForegroundColor Magenta
-    Write-Host "3: Configure Ship Modules " -ForegroundColor Cyan
-    Write-Host "4: Stratagem Hero$([char]174) *COMING SOON*" -ForegroundColor Cyan
-    Write-Host "(Q)uit - (H)elp - (M)enu" -ForegroundColor White
-    Write-Host  " "
+    Vanity-NewLine 2 -ForegroundColor Magenta 
+    Vanity-Tab 2 -ForegroundColor Magenta 
+    Vanity-Text "Main Menu" -ForegroundColor Magenta 
+    Vanity-Tab 4 -ForegroundColor Cyan
+    Vanity-Text "1: Search Stratagems" -ForegroundColor Cyan -SkipTyping $true
+    Vanity-Tab 4 -ForegroundColor Cyan
+    Vanity-Text "2: UPDATE Stratagems" -ForegroundColor Cyan -SkipTyping $true
+    Vanity-Tab 4 -ForegroundColor Cyan
+    Vanity-Text "3: Configure Ship Modules " -ForegroundColor Cyan -SkipTyping $true
+    Vanity-Tab 4 -ForegroundColor Cyan
+    Vanity-Text "4: Stratagem Hero$([char]174) *COMING SOON*" -ForegroundColor Cyan -SkipTyping $true
+    Vanity-Tab 4 -ForegroundColor Cyan
+    Vanity-Text "   (Q)uit - (H)elp - (M)enu" -ForegroundColor White -SkipTyping $true
 }
 
 function terminal() {
@@ -481,6 +519,8 @@ Vanity-Logo "|----------------------------------------- Aiding Democracy since 2
 
     Show-Menu
     do {
+        Vanity-NewLine 1
+        Vanity-Tab 2
         $selection = Read-Host "Please make a selection" 
         switch ($selection) {
             '1' {
@@ -508,6 +548,12 @@ Vanity-Logo "|----------------------------------------- Aiding Democracy since 2
             ''{
                 Show-Menu
             }
+            default {
+                if ($selection -ne 'q'){
+                    Vanity-Tab 4 -ForegroundColor Red
+                    Vanity-Text "`'$selection`' is not a valid selection" -ForegroundColor Red
+                }
+            }
         }
         
     }
@@ -532,6 +578,10 @@ elseif ($strat) {
     if ($code) {
         Enter-Keypress -stratagemCode $code
     }
+}
+
+elseif ($setup){
+    Setup-Script
 }
 
 else {
