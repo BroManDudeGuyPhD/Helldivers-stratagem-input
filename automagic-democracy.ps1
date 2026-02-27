@@ -27,7 +27,7 @@ Runs setup function
 
 .OUTPUTS
 Will create stratagems.json if not already present in home directory. 
-This is parsed data from the Helldivers 2 wiki at https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2 
+This is parsed data from the Helldivers 2 wiki at https://helldivers.wiki.gg/wiki/Stratagems
 
 .NOTES
 README.md has more information, but access the Repo for the most info at https://github.com/BroManDudeGuyPhD/Helldivers-stratagem-input
@@ -206,184 +206,170 @@ function Setup {
 }
 
 function Update-Json {
-    Vanity-NewLine 2
-    Vanity-Tab 4
-    Vanity-Text " Updating Stratagems" -ForegroundColor Green
-    
-
-    # Backup existing stratagems
-    $date = Get-Date -Format "yyyyMMdd_hhmmss"
-    Vanity-NewLine 2
-    Vanity-Tab 8
-    Vanity-Text " Backing Up Files" -ForegroundColor Green
-    Copy-Item $stratagesmDataFile -Destination democracy-backup$date.json
-
     $DataFileJson = @{}
     $StratagemList = New-Object System.Collections.ArrayList
-    
-    # At some point I want to implement customizable aliases for stratagems, this is a backup I've commented out for now since only the raw data is stored
-    # Copy-Item .\stratagems.json stratagems.json.bak
+
+    # Back up existing data file before overwriting — used for change analytics below
+    $backupFile = Join-Path $env:TEMP "democracy.json.bak"
+    $oldStratagemNames = @()
+    if (Test-Path $stratagesmDataFile) {
+        Copy-Item -Path $stratagesmDataFile -Destination $backupFile -Force
+        try {
+            $oldJson = Get-Content $stratagesmDataFile -Raw | ConvertFrom-Json
+            $oldStratagemNames = @($oldJson.Democracy.Stratagems | ForEach-Object { $_.Name })
+        } catch { }
+    }
+
+    # Use the Fandom MediaWiki API — returns JSON with raw wikitext, bypasses Cloudflare entirely.
+    # Works in both Windows PowerShell 5.1 (powershell.exe) and PowerShell 7 (pwsh).
+    # The wikitext encodes arrow directions as {{U}}, {{D}}, {{L}}, {{R}} templates.
+    $apiURL = "https://helldivers.fandom.com/api.php?action=parse&page=Stratagem_Codes&prop=wikitext&format=json"
 
     try {
-        $wikiURL = "https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2)"
-
-        $request = Invoke-WebRequest -Uri $wikiURL
-        $tables = @($request.ParsedHtml.getElementsByTagName("TABLE"))
-
-        foreach ($table in $tables) {
-
-            $rows = @($table.Rows)
-        
-            foreach ($row in $rows) {
-                $inputCode = ""
-                $cells = @($row.Cells)
-            
-                if ($cells[0].tagName -eq "TD") {
-                    $cells[2].childNodes | Foreach-Object {
-                        # Looks in the table cell that contains stratagem codes for images, and uses image name to determine direction
-                        if ($_.className -eq 'image') { 
-                            $arrowDirection = $_
-                            $arrowDirection = $arrowDirection.href
-                            $splitArray = $arrowDirection -split '.png'
-                            $temp = $splitArray[0]
-                            $lastChar = $temp[-1]
-
-                            if ($lastChar -match "U") {
-                                $inputCode += "U"
-                            }
-                            elseif ($lastChar -match "D") {
-                                $inputCode += "D"
-                            }
-                            elseif ($lastChar -match "L") {
-                                $inputCode += "L"
-                            }
-                            elseif ($lastChar -match "R") {
-                                $inputCode += "R"
-                            }
-                        }
-                    }
-
-                    # Parse the HTML to determine info for each Stratagem
-                    $name = $cells[1] | ForEach-Object { ("" + $_.InnerText).Trim() }
-                    $coolDown = $cells[3] | ForEach-Object { ("" + $_.InnerText).Trim() }
-                    $uses = $cells[4] | ForEach-Object { ("" + $_.InnerText).Trim() }
-                    $activationTime = $cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() }
-                    # $activationTime = @($cells[5] | ForEach-Object { ("" + $_.InnerText).Trim() })
-
-                    # Stratagem Name formatting
-                    # Some names are like AC-8 Autocannon. Alias trims that to "Autocannon"
-                    # However, "Eagle Rearm" will not have a unique alias value
-                    $name = $name.Replace('"', "")
-
-                    if ($name.Contains("-")) {
-                        $shortName = $name -split '-', 2;
-                        $alias = $shortName[1] -split ' ', 2;
-                        $alias = $alias[1..($alias.Length - 1)]
-                        $alias
-                    }
-
-                    # If there is no need for an alias, just fill in alias falue with name to prevent search issues
-                    else {
-                        $alias = $name;
-                        $name
-                    }
-
-
-                    # Cooldown & Activation Time formatting
-                    # Removes minute conversion, leaving only refferences to seconds
-                    $coolDown = $coolDown.Replace("seconds", "").Replace("second", "")
-                    $cooolDownSeconds = $coolDown.Split("(");
-                    $cooolDownSeconds = $cooolDownSeconds[0].Trim();
-
-                    $activationTime = $activationTime.Replace("seconds", "").Replace("second", "")
-                    $activationTimeSeconds = $activationTime.Split("("); 
-                    $activationTimeSeconds = $activationTimeSeconds[0].Trim();
-
-                    # Adding all the parsed and formatted data to a List
-                    [void]$StratagemList.Add(@{"Name" = $name;
-                            "Alias"                   = "$alias";
-                            "Code"                    = $inputCode;
-                            "Cooldown"                = $cooolDownSeconds;
-                            "Uses"                    = $uses;
-                            "ActivationTime"          = $activationTimeSeconds;
-                        })
-
-                    continue
-                }
-            }
-        }
-
-        $Stratagems = @{"Stratagems" = $StratagemList; }
-        $DataFileJson.Add("Democracy", $Stratagems)
-
-    <#
-    foreach ($key in $StratagemJson.Democracy.Stratagems) {
-		
-        if($key.Name -eq $strat -Or $key.Alias -eq $strat){
-            Write-Host $key.Name $key.Code -ForegroundColor Cyan
-        }
-		
+        $response = Invoke-WebRequest -Uri $apiURL -UseBasicParsing -ErrorAction Stop
+    } catch {
+        Write-Host "Failed to fetch stratagem data: $_" -ForegroundColor Red
+        return
     }
-    #>
 
-    
+    $wikitext = ($response.Content | ConvertFrom-Json).parse.wikitext.'*'
+    if (-not $wikitext) {
+        Write-Host "Could not parse wikitext from API response." -ForegroundColor Red
+        return
+    }
+
+    # Split into table rows on any "|-" line (may have trailing style attributes)
+    $rows = $wikitext -split '\n[ \t]*\|-[^\n]*\n'
+
+    foreach ($row in $rows) {
+        # Collect lines that are table cells (start with |) — excluding "|-" and "|}" lines
+        $cellLines = $row -split '\n' | Where-Object { $_ -match '^\s*\|' -and $_ -notmatch '^\s*\|[\-\}]' }
+
+        # Need at least 6 cells: icon | name | code | cooldown | uses | activation
+        if ($cellLines.Count -lt 6) { continue }
+
+        # Cell 0: icon — must be a [[File:]] link; guards against colspan/section rows
+        if ($cellLines[0] -notmatch '\[\[File:') { continue }
+
+        # Cell 1: name — extract from [[Name]] wikilink
+        if ($cellLines[1] -notmatch '\[\[([^\|\]]+)') { continue }
+        $name = $matches[1].Trim().Replace('"', "")
+        if ($name -eq "") { continue }
+
+        # Cell 2: input code — built from {{U}}, {{D}}, {{L}}, {{R}} templates
+        $inputCode = ""
+        foreach ($m in [regex]::Matches($cellLines[2], '\{\{([UDLR])\}\}')) {
+            $inputCode += $m.Groups[1].Value
+        }
+        if ($inputCode -eq "") { continue }
+
+        # Generate alias: strip model prefix so "MG-43 Machine Gun" -> "Machine Gun"
+        # Split on first "-", then skip the model number token after the dash
+        if ($name.Contains("-")) {
+            $shortName = $name -split '-', 2
+            $parts = $shortName[1] -split ' ', 2
+            $alias = if ($parts.Count -ge 2) { $parts[1].Trim() } else { $shortName[1].Trim() }
+        } else {
+            # No model prefix; use full name as alias (e.g. "Orbital Laser", "Eagle Rearm")
+            $alias = $name
+        }
+        if (-not $alias) { $alias = $name }
+
+        # Extract the value from a wikitext cell — handles both "|VALUE" and "| style=... |VALUE"
+        # Taking the last pipe-delimited segment works for both formats
+        $getValue = { param($line) ($line -split '\|')[-1].Trim() }
+
+        # Cells 3-5: cooldown | uses | activation time
+        # Strip "seconds"/"second" labels and parenthetical minute conversions
+        $cooldown = (& $getValue $cellLines[3]) -replace 'seconds?', ''
+        $cooldown = ($cooldown -split '\(')[0].Trim()
+
+        $uses = & $getValue $cellLines[4]
+
+        $activationTime = (& $getValue $cellLines[5]) -replace 'seconds?', ''
+        $activationTime = ($activationTime -split '\(')[0].Trim()
+
+        [void]$StratagemList.Add(@{
+            "Name"           = $name
+            "Alias"          = $alias
+            "Code"           = $inputCode
+            "Cooldown"       = $cooldown
+            "Uses"           = $uses
+            "ActivationTime" = $activationTime
+        })
+    }
+
+    $Stratagems = @{ "Stratagems" = $StratagemList }
+    $DataFileJson.Add("Democracy", $Stratagems)
+
     $ModuleList = New-Object System.Collections.ArrayList
-    
-    $wikiURL = "https://helldivers.fandom.com/wiki/Super_Destroyer"
-    $moduleRequest = Invoke-WebRequest -Uri $wikiURL
 
-    $moduleNameAndDescription = @($moduleRequest.ParsedHtml.getElementsByTagName("p") | Where-Object { $null -ne $_.InnerText })
-    $moduleInfo= @($moduleRequest.ParsedHtml.getElementsByTagName("ul") | Where-Object { $null -ne $_.InnerText })
+    # $wikiURL = "https://helldivers.fandom.com/wiki/Super_Destroyer"
+    # $moduleRequest = Invoke-WebRequest -Uri $wikiURL
 
-    $moduleNameAndDescription = @($moduleNameAndDescription | Where-Object { $_.InnerText.Contains(":") -and $_.InnerHTML.contains("<B>") })
-    $moduleInfo = $moduleInfo.InnerText | Where-Object { $_.contains("Effect:") }
-    
-    $iterator = 0
-    foreach ($module in $moduleInfo) {
+    # $moduleNameAndDescription = @($moduleRequest.ParsedHtml.getElementsByTagName("p") | Where-Object { $null -ne $_.InnerText })
+    # $moduleInfo= @($moduleRequest.ParsedHtml.getElementsByTagName("ul") | Where-Object { $null -ne $_.InnerText })
 
-        $module = $module -split 'Cost:';
-        $moduleEffect = $module[0].Replace("Effect: ", "").Replace('"', "").trim()
-        $moduleCost = $module[1].Replace(" Samples ", "").trim()
-        $moduleNameSplit = $moduleNameAndDescription[$iterator].InnerText -split ':'
-        $moduleName = $moduleNameSplit[0].trim()
-        $moduleDescription = $moduleNameSplit[1].Replace('"', "").trim()
+    # $moduleNameAndDescription = @($moduleNameAndDescription | Where-Object { $_.InnerText.Contains(":") -and $_.InnerHTML.contains("<B>") })
+    # $moduleInfo = $moduleInfo.InnerText | Where-Object { $_.contains("Effect:") }
 
-        [void]$ModuleList.Add(@{"Name" = $moduleName;
-                "Description"          = $moduleDescription;
-                "Effect"               = $moduleEffect;
-                "Cost"                 = $moduleCost;
-            })
+    # $iterator = 0
+    # foreach ($module in $moduleInfo) {
 
-        $iterator++
-    }
+    #     $module = $module -split 'Cost:';
+    #     $moduleEffect = $module[0].Replace("Effect: ", "").Replace('"', "").trim()
+    #     $moduleCost = $module[1].Replace(" Samples ", "").trim()
+    #     $moduleNameSplit = $moduleNameAndDescription[$iterator].InnerText -split ':'
+    #     $moduleName = $moduleNameSplit[0].trim()
+    #     $moduleDescription = $moduleNameSplit[1].Replace('"', "").trim()
 
-    $Modules = @{"Ship Modules" = $ModuleList; }
-    #$DataFileJson.Add("Democracy",$Modules)
+    #     [void]$ModuleList.Add(@{"Name" = $moduleName;
+    #             "Description"          = $moduleDescription;
+    #             "Effect"               = $moduleEffect;
+    #             "Cost"                 = $moduleCost;
+    #         })
+
+    #     $iterator++
+    # }
+
+    $Modules = @{ "Ship Modules" = $ModuleList }
     $DataFileJson.Democracy += $Modules
-    $DataFileJson | ConvertTo-Json -Depth 10 | Out-File $stratagesmDataFile  
+    $DataFileJson | ConvertTo-Json -Depth 10 | Out-File $stratagesmDataFile
+
+    # Change analytics — compare new list against backup
+    $newStratagemNames = @($StratagemList | ForEach-Object { $_["Name"] })
+    $added   = @($newStratagemNames | Where-Object { $oldStratagemNames -notcontains $_ })
+    $removed = @($oldStratagemNames | Where-Object { $newStratagemNames -notcontains $_ })
 
     Vanity-NewLine 2
     Vanity-Tab 4 -ForegroundColor Cyan
     Vanity-Text "Stratagems UPDATED" -ForegroundColor Cyan
+    Vanity-Tab 4 -ForegroundColor Cyan
+    Vanity-Text "Total: $($newStratagemNames.Count) stratagems" -ForegroundColor Cyan -SkipTyping $true
+    if ($oldStratagemNames.Count -gt 0) {
+        if ($added.Count -gt 0) {
+            Vanity-Tab 4 -ForegroundColor Green
+            Vanity-Text "+$($added.Count) added" -ForegroundColor Green -SkipTyping $true
+            foreach ($n in $added) {
+                Vanity-Tab 6 -ForegroundColor Green
+                Vanity-Text $n -ForegroundColor Green -SkipTyping $true
+            }
+        }
+        if ($removed.Count -gt 0) {
+            Vanity-Tab 4 -ForegroundColor Yellow
+            Vanity-Text "-$($removed.Count) removed" -ForegroundColor Yellow -SkipTyping $true
+            foreach ($n in $removed) {
+                Vanity-Tab 6 -ForegroundColor Yellow
+                Vanity-Text $n -ForegroundColor Yellow -SkipTyping $true
+            }
+        }
+        if ($added.Count -eq 0 -and $removed.Count -eq 0) {
+            Vanity-Tab 4 -ForegroundColor Cyan
+            Vanity-Text "No changes from previous data" -ForegroundColor Cyan -SkipTyping $true
+        }
+    }
     Vanity-NewLine 2
     Vanity-Tab 4
-    Show-Menu
-}
-
-catch {
-    # Catch any error
-    Vanity-NewLine 2
-    Vanity-Tab 8 -ForegroundColor Red
-    Vanity-Text " An error occurred... restoring backup" -ForegroundColor Red
-    # Backup existing stratagems 
-    Remove-Item $stratagesmDataFile
-    Rename-Item democracy-backup$date.json -NewName $stratagesmDataFile
-    Vanity-NewLine 2
-    Vanity-Tab 4
-    Vanity-Text " Backup RESTORED " -BackgroundColor Green -ForegroundColor Cyan
-    Show-Menu
-}
-
 }
 
 

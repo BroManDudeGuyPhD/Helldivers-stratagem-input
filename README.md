@@ -1,7 +1,7 @@
 # Helldivers Automated Stratagem Input  
 
 All currently availiable stratagems are mapped in democracy.json.  
-This process is automatic, if there are ever any changes the `-update` command can be run and the script will access the [Helldivers 2 Wiki](https://helldivers.fandom.com/wiki/Stratagem_Codes_(Helldivers_2)) to grab any new codes. The update will also be triggered automatically and give a context menu if the script runs and the democracy.json file is mnissing for some reason  
+This process is automatic, if there are ever any changes the `-update` command can be run and the script will access the [Helldivers 2 Wiki](https://helldivers.wiki.gg/wiki/Stratagems) to grab any new codes. The update will also be triggered automatically and give a context menu if the script runs and the democracy.json file is mnissing for some reason  
 
 The update can be run very easily: 
 `automagic-democracy.ps1 -update`  
