@@ -6,7 +6,9 @@
         "ActivationTime": "3",
         "Uses": "Unlimited",
         "Name": "Orbital Precision Strike",
-        "Alias": "Orbital Precision Strike",
+        "Aliases": [
+          "Orbital Precision Strike"
+        ],
         "Code": "RRU",
         "Cooldown": "100"
       },
@@ -14,7 +16,9 @@
         "ActivationTime": "2.05",
         "Uses": "Unlimited",
         "Name": "Orbital Gatling Barrage",
-        "Alias": "Orbital Gatling Barrage",
+        "Aliases": [
+          "Orbital Gatling Barrage"
+        ],
         "Code": "RDLUU",
         "Cooldown": "70"
       },
@@ -22,7 +26,9 @@
         "ActivationTime": "3.45",
         "Uses": "Unlimited",
         "Name": "Orbital Airburst Strike",
-        "Alias": "Orbital Airburst Strike",
+        "Aliases": [
+          "Orbital Airburst Strike"
+        ],
         "Code": "RRR",
         "Cooldown": "100"
       },
@@ -30,7 +36,9 @@
         "ActivationTime": "6.45",
         "Uses": "Unlimited",
         "Name": "Orbital Napalm Barrage",
-        "Alias": "Orbital Napalm Barrage",
+        "Aliases": [
+          "Orbital Napalm Barrage"
+        ],
         "Code": "RRDLRU",
         "Cooldown": "240"
       },
@@ -38,7 +46,9 @@
         "ActivationTime": "6.45",
         "Uses": "Unlimited",
         "Name": "Orbital 120MM HE Barrage",
-        "Alias": "Orbital 120MM HE Barrage",
+        "Aliases": [
+          "Orbital 120MM HE Barrage"
+        ],
         "Code": "RRDLRD",
         "Cooldown": "180"
       },
@@ -46,7 +56,9 @@
         "ActivationTime": "4.45",
         "Uses": "Unlimited",
         "Name": "Orbital Walking Barrage",
-        "Alias": "Orbital Walking Barrage",
+        "Aliases": [
+          "Orbital Walking Barrage"
+        ],
         "Code": "RDRDRD",
         "Cooldown": "240"
       },
@@ -54,7 +66,9 @@
         "ActivationTime": "7.45",
         "Uses": "Unlimited",
         "Name": "Orbital 380MM HE Barrage",
-        "Alias": "Orbital 380MM HE Barrage",
+        "Aliases": [
+          "Orbital 380MM HE Barrage"
+        ],
         "Code": "RDUULDD",
         "Cooldown": "240"
       },
@@ -62,7 +76,9 @@
         "ActivationTime": "0",
         "Uses": "Unlimited",
         "Name": "Orbital Railcannon Strike",
-        "Alias": "Orbital Railcannon Strike",
+        "Aliases": [
+          "Orbital Railcannon Strike"
+        ],
         "Code": "RUDDR",
         "Cooldown": "210"
       },
@@ -70,7 +86,9 @@
         "ActivationTime": "1",
         "Uses": "3",
         "Name": "Orbital Laser",
-        "Alias": "Orbital Laser",
+        "Aliases": [
+          "Orbital Laser"
+        ],
         "Code": "RDURD",
         "Cooldown": "300"
       },
@@ -78,7 +96,9 @@
         "ActivationTime": "3.45",
         "Uses": "Unlimited",
         "Name": "Orbital EMS Strike",
-        "Alias": "Orbital EMS Strike",
+        "Aliases": [
+          "Orbital EMS Strike"
+        ],
         "Code": "RRLD",
         "Cooldown": "75"
       },
@@ -86,7 +106,9 @@
         "ActivationTime": "3.45",
         "Uses": "Unlimited",
         "Name": "Orbital Gas Strike",
-        "Alias": "Orbital Gas Strike",
+        "Aliases": [
+          "Orbital Gas Strike"
+        ],
         "Code": "RRDR",
         "Cooldown": "75"
       },
@@ -94,7 +116,9 @@
         "ActivationTime": "3.45",
         "Uses": "Unlimited",
         "Name": "Orbital Smoke Strike",
-        "Alias": "Orbital Smoke Strike",
+        "Aliases": [
+          "Orbital Smoke Strike"
+        ],
         "Code": "RRDU",
         "Cooldown": "100"
       },
@@ -102,7 +126,9 @@
         "ActivationTime": "3.45",
         "Uses": "1",
         "Name": "Eagle 500kg Bomb",
-        "Alias": "Eagle 500kg Bomb",
+        "Aliases": [
+          "Eagle 500kg Bomb"
+        ],
         "Code": "URDDD",
         "Cooldown": "8"
       },
@@ -110,7 +136,9 @@
         "ActivationTime": "2.4",
         "Uses": "4",
         "Name": "Eagle Strafing Run",
-        "Alias": "Eagle Strafing Run",
+        "Aliases": [
+          "Eagle Strafing Run"
+        ],
         "Code": "URR",
         "Cooldown": "8"
       },
@@ -118,7 +146,9 @@
         "ActivationTime": "3.4",
         "Uses": "2",
         "Name": "Eagle 110MM Rocket Pods",
-        "Alias": "Eagle 110MM Rocket Pods",
+        "Aliases": [
+          "Eagle 110MM Rocket Pods"
+        ],
         "Code": "URUL",
         "Cooldown": "8"
       },
@@ -126,7 +156,9 @@
         "ActivationTime": "4.1",
         "Uses": "2",
         "Name": "Eagle Airstrike",
-        "Alias": "Eagle Airstrike",
+        "Aliases": [
+          "Eagle Airstrike"
+        ],
         "Code": "URDR",
         "Cooldown": "8"
       },
@@ -134,7 +166,9 @@
         "ActivationTime": "4.35",
         "Uses": "4",
         "Name": "Eagle Cluster Bomb",
-        "Alias": "Eagle Cluster Bomb",
+        "Aliases": [
+          "Eagle Cluster Bomb"
+        ],
         "Code": "URDDR",
         "Cooldown": "8"
       },
@@ -142,7 +176,9 @@
         "ActivationTime": "4.1",
         "Uses": "2",
         "Name": "Eagle Napalm Airstrike",
-        "Alias": "Eagle Napalm Airstrike",
+        "Aliases": [
+          "Eagle Napalm Airstrike"
+        ],
         "Code": "URDU",
         "Cooldown": "8"
       },
@@ -150,7 +186,9 @@
         "ActivationTime": "4.4",
         "Uses": "2",
         "Name": "Eagle Smoke Strike",
-        "Alias": "Eagle Smoke Strike",
+        "Aliases": [
+          "Eagle Smoke Strike"
+        ],
         "Code": "URUD",
         "Cooldown": "8"
       },
@@ -158,7 +196,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "CQC-1 One True Flag",
-        "Alias": "One True Flag",
+        "Aliases": [
+          "CQC-1",
+          "One True Flag"
+        ],
         "Code": "DLRRU",
         "Cooldown": "480"
       },
@@ -166,7 +207,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "MG-43 Machine Gun",
-        "Alias": "Machine Gun",
+        "Aliases": [
+          "MG-43",
+          "Machine Gun"
+        ],
         "Code": "DLDUR",
         "Cooldown": "480"
       },
@@ -174,7 +218,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "M-105 Stalwart",
-        "Alias": "Stalwart",
+        "Aliases": [
+          "M-105",
+          "Stalwart"
+        ],
         "Code": "DLDUUL",
         "Cooldown": "480"
       },
@@ -182,7 +229,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "MG-206 Heavy Machine Gun",
-        "Alias": "Heavy Machine Gun",
+        "Aliases": [
+          "MG-206",
+          "Heavy Machine Gun"
+        ],
         "Code": "DLUDD",
         "Cooldown": "480"
       },
@@ -190,7 +240,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "RS-422 Railgun",
-        "Alias": "Railgun",
+        "Aliases": [
+          "RS-422",
+          "Railgun"
+        ],
         "Code": "DRDULR",
         "Cooldown": "480"
       },
@@ -198,7 +251,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "APW-1 Anti-Materiel Rifle",
-        "Alias": "Anti-Materiel Rifle",
+        "Aliases": [
+          "APW-1",
+          "Anti-Materiel Rifle"
+        ],
         "Code": "DLRUD",
         "Cooldown": "480"
       },
@@ -206,7 +262,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "GL-21 Grenade Launcher",
-        "Alias": "Grenade Launcher",
+        "Aliases": [
+          "GL-21",
+          "Grenade Launcher"
+        ],
         "Code": "DLULD",
         "Cooldown": "480"
       },
@@ -214,7 +273,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "GL-52 De-Escalator",
-        "Alias": "De-Escalator",
+        "Aliases": [
+          "GL-52",
+          "De-Escalator"
+        ],
         "Code": "DRULR",
         "Cooldown": "480"
       },
@@ -222,7 +284,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "TX-41 Sterilizer",
-        "Alias": "Sterilizer",
+        "Aliases": [
+          "TX-41",
+          "Sterilizer"
+        ],
         "Code": "DLUDL",
         "Cooldown": "480"
       },
@@ -230,7 +295,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "FLAM-40 Flamethrower",
-        "Alias": "Flamethrower",
+        "Aliases": [
+          "FLAM-40",
+          "Flamethrower"
+        ],
         "Code": "DLUDU",
         "Cooldown": "480"
       },
@@ -238,7 +306,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "LAS-98 Laser Cannon",
-        "Alias": "Laser Cannon",
+        "Aliases": [
+          "LAS-98",
+          "Laser Cannon"
+        ],
         "Code": "DLDUL",
         "Cooldown": "480"
       },
@@ -246,7 +317,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "LAS-99 Quasar Cannon",
-        "Alias": "Quasar Cannon",
+        "Aliases": [
+          "LAS-99",
+          "Quasar Cannon"
+        ],
         "Code": "DDULR",
         "Cooldown": "480"
       },
@@ -254,7 +328,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "ARC-3 Arc Thrower",
-        "Alias": "Arc Thrower",
+        "Aliases": [
+          "ARC-3",
+          "Arc Thrower"
+        ],
         "Code": "DRDULL",
         "Cooldown": "480"
       },
@@ -262,7 +339,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "MLS-4X Commando",
-        "Alias": "Commando",
+        "Aliases": [
+          "MLS-4X",
+          "Commando"
+        ],
         "Code": "DLUDR",
         "Cooldown": "120"
       },
@@ -270,7 +350,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "EAT-17 Expendable Anti-Tank",
-        "Alias": "Expendable Anti-Tank",
+        "Aliases": [
+          "EAT-17",
+          "Expendable Anti-Tank"
+        ],
         "Code": "DDLUR",
         "Cooldown": "70"
       },
@@ -278,7 +361,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "AC-8 Autocannon",
-        "Alias": "Autocannon",
+        "Aliases": [
+          "AC-8",
+          "Autocannon"
+        ],
         "Code": "DLDUUR",
         "Cooldown": "480"
       },
@@ -286,7 +372,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "RL-77 Airburst Rocket Launcher",
-        "Alias": "Airburst Rocket Launcher",
+        "Aliases": [
+          "RL-77",
+          "Airburst Rocket Launcher"
+        ],
         "Code": "DUULR",
         "Cooldown": "480"
       },
@@ -294,7 +383,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "FAF-14 Spear",
-        "Alias": "Spear",
+        "Aliases": [
+          "FAF-14",
+          "Spear"
+        ],
         "Code": "DDUDD",
         "Cooldown": "480"
       },
@@ -302,7 +394,10 @@
         "ActivationTime": "7.75",
         "Uses": "Unlimited",
         "Name": "StA-X3 W.A.S.P. Launcher",
-        "Alias": "W.A.S.P. Launcher",
+        "Aliases": [
+          "StA-X3",
+          "W.A.S.P. Launcher"
+        ],
         "Code": "DDUDR",
         "Cooldown": "432"
       },
@@ -310,7 +405,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "GR-8 Recoilless Rifle",
-        "Alias": "Recoilless Rifle",
+        "Aliases": [
+          "GR-8",
+          "Recoilless Rifle"
+        ],
         "Code": "DLRRL",
         "Cooldown": "480"
       },
@@ -318,7 +416,9 @@
         "ActivationTime": "9.75",
         "Uses": "Unlimited",
         "Name": "Backpacks#Supply Pack",
-        "Alias": "Backpacks#Supply Pack",
+        "Aliases": [
+          "Backpacks#Supply Pack"
+        ],
         "Code": "DLDUUD",
         "Cooldown": "480"
       },
@@ -326,7 +426,10 @@
         "ActivationTime": "9.75",
         "Uses": "Unlimited",
         "Name": "B-100 Portable Hellbomb",
-        "Alias": "Portable Hellbomb",
+        "Aliases": [
+          "B-100",
+          "Portable Hellbomb"
+        ],
         "Code": "DRUUU",
         "Cooldown": "300"
       },
@@ -334,7 +437,10 @@
         "ActivationTime": "9.75",
         "Uses": "Unlimited",
         "Name": "LIFT-860 Hover Pack",
-        "Alias": "Hover Pack",
+        "Aliases": [
+          "LIFT-860",
+          "Hover Pack"
+        ],
         "Code": "DUUDLR",
         "Cooldown": "480"
       },
@@ -342,7 +448,9 @@
         "ActivationTime": "9.75",
         "Uses": "Unlimited",
         "Name": "Backpacks#Jump Pack",
-        "Alias": "Backpacks#Jump Pack",
+        "Aliases": [
+          "Backpacks#Jump Pack"
+        ],
         "Code": "DUUDU",
         "Cooldown": "480"
       },
@@ -350,7 +458,9 @@
         "ActivationTime": "9.75",
         "Uses": "Unlimited",
         "Name": "Backpacks#Shield Generator Pack",
-        "Alias": "Backpacks#Shield Generator Pack",
+        "Aliases": [
+          "Backpacks#Shield Generator Pack"
+        ],
         "Code": "DULRLR",
         "Cooldown": "480"
       },
@@ -358,7 +468,9 @@
         "ActivationTime": "9.75",
         "Uses": "Unlimited",
         "Name": "Backpacks#Directional Shield",
-        "Alias": "Backpacks#Directional Shield",
+        "Aliases": [
+          "Backpacks#Directional Shield"
+        ],
         "Code": "DULRUU",
         "Cooldown": "300"
       },
@@ -366,7 +478,9 @@
         "ActivationTime": "9.75",
         "Uses": "Unlimited",
         "Name": "Backpacks#Ballistic Shield",
-        "Alias": "Backpacks#Ballistic Shield",
+        "Aliases": [
+          "Backpacks#Ballistic Shield"
+        ],
         "Code": "DLDDUL",
         "Cooldown": "300"
       },
@@ -374,7 +488,10 @@
         "ActivationTime": "9.75",
         "Uses": "Unlimited",
         "Name": "AX/ARC-3 Guard Dog K-9",
-        "Alias": "Guard Dog K-9",
+        "Aliases": [
+          "AX/ARC-3",
+          "Guard Dog K-9"
+        ],
         "Code": "DULURL",
         "Cooldown": "480"
       },
@@ -382,7 +499,9 @@
         "ActivationTime": "9.75",
         "Uses": "Unlimited",
         "Name": "Backpacks#Guard Dog",
-        "Alias": "Backpacks#Guard Dog",
+        "Aliases": [
+          "Backpacks#Guard Dog"
+        ],
         "Code": "DULURD",
         "Cooldown": "480"
       },
@@ -390,7 +509,9 @@
         "ActivationTime": "9.75",
         "Uses": "Unlimited",
         "Name": "Backpacks#Guard Dog Rover",
-        "Alias": "Backpacks#Guard Dog Rover",
+        "Aliases": [
+          "Backpacks#Guard Dog Rover"
+        ],
         "Code": "DULURR",
         "Cooldown": "480"
       },
@@ -398,7 +519,9 @@
         "ActivationTime": "9.75",
         "Uses": "Unlimited",
         "Name": "Backpacks#Guard Dog Dog Breath",
-        "Alias": "Backpacks#Guard Dog Dog Breath",
+        "Aliases": [
+          "Backpacks#Guard Dog Dog Breath"
+        ],
         "Code": "DULURU",
         "Cooldown": "480"
       },
@@ -406,7 +529,10 @@
         "ActivationTime": "10.50",
         "Uses": "Unlimited",
         "Name": "M-102 Fast Recon Vehicle",
-        "Alias": "Fast Recon Vehicle",
+        "Aliases": [
+          "M-102",
+          "Fast Recon Vehicle"
+        ],
         "Code": "LDRDRDU",
         "Cooldown": "480"
       },
@@ -414,7 +540,10 @@
         "ActivationTime": "10.5",
         "Uses": "3",
         "Name": "EXO-49 Emancipator Exosuit",
-        "Alias": "Emancipator Exosuit",
+        "Aliases": [
+          "EXO-49",
+          "Emancipator Exosuit"
+        ],
         "Code": "LDRULDU",
         "Cooldown": "600"
       },
@@ -422,7 +551,10 @@
         "ActivationTime": "10.5",
         "Uses": "3",
         "Name": "EXO-45 Patriot Exosuit",
-        "Alias": "Patriot Exosuit",
+        "Aliases": [
+          "EXO-45",
+          "Patriot Exosuit"
+        ],
         "Code": "LDRULDD",
         "Cooldown": "600"
       },
@@ -430,7 +562,10 @@
         "ActivationTime": "10,5",
         "Uses": "Unlimited",
         "Name": "TD-220 Bastion",
-        "Alias": "Bastion",
+        "Aliases": [
+          "TD-220",
+          "Bastion"
+        ],
         "Code": "LDRDLDU",
         "Cooldown": "780"
       },
@@ -438,7 +573,9 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "Sentries#Gatling",
-        "Alias": "Sentries#Gatling",
+        "Aliases": [
+          "Sentries#Gatling"
+        ],
         "Code": "DURL",
         "Cooldown": "180"
       },
@@ -446,7 +583,9 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "Sentries#Machine Gun",
-        "Alias": "Sentries#Machine Gun",
+        "Aliases": [
+          "Sentries#Machine Gun"
+        ],
         "Code": "DURRU",
         "Cooldown": "120"
       },
@@ -454,7 +593,9 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "Sentries#Flame",
-        "Alias": "Sentries#Flame",
+        "Aliases": [
+          "Sentries#Flame"
+        ],
         "Code": "DURDUU",
         "Cooldown": "150"
       },
@@ -462,7 +603,9 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "Sentries#Rocket",
-        "Alias": "Sentries#Rocket",
+        "Aliases": [
+          "Sentries#Rocket"
+        ],
         "Code": "DURRL",
         "Cooldown": "180"
       },
@@ -470,7 +613,9 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "Sentries#Autocannon",
-        "Alias": "Sentries#Autocannon",
+        "Aliases": [
+          "Sentries#Autocannon"
+        ],
         "Code": "DURULU",
         "Cooldown": "180"
       },
@@ -478,7 +623,9 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "Sentries#EMS Mortar",
-        "Alias": "Sentries#EMS Mortar",
+        "Aliases": [
+          "Sentries#EMS Mortar"
+        ],
         "Code": "DURDR",
         "Cooldown": "180"
       },
@@ -486,7 +633,9 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "Sentries#Mortar",
-        "Alias": "Sentries#Mortar",
+        "Aliases": [
+          "Sentries#Mortar"
+        ],
         "Code": "DURRD",
         "Cooldown": "180"
       },
@@ -494,7 +643,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "FX-12 Shield Generator Relay",
-        "Alias": "Shield Generator Relay",
+        "Aliases": [
+          "FX-12",
+          "Shield Generator Relay"
+        ],
         "Code": "DDLRLR",
         "Cooldown": "90"
       },
@@ -502,7 +654,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "E/GL-21 Grenadier Battlement",
-        "Alias": "Grenadier Battlement",
+        "Aliases": [
+          "E/GL-21",
+          "Grenadier Battlement"
+        ],
         "Code": "DRDLR",
         "Cooldown": "180"
       },
@@ -510,7 +665,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "E/AT-12 Anti-Tank Emplacement",
-        "Alias": "Anti-Tank Emplacement",
+        "Aliases": [
+          "E/AT-12",
+          "Anti-Tank Emplacement"
+        ],
         "Code": "DULRRR",
         "Cooldown": "180"
       },
@@ -518,7 +676,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "E/MG-101 HMG Emplacement",
-        "Alias": "HMG Emplacement",
+        "Aliases": [
+          "E/MG-101",
+          "HMG Emplacement"
+        ],
         "Code": "DULRRL",
         "Cooldown": "180"
       },
@@ -526,7 +687,9 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "Sentries#Tesla",
-        "Alias": "Sentries#Tesla",
+        "Aliases": [
+          "Sentries#Tesla"
+        ],
         "Code": "DURULR",
         "Cooldown": "150"
       },
@@ -534,7 +697,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "MD-17 Anti-Tank Mines",
-        "Alias": "Anti-Tank Mines",
+        "Aliases": [
+          "MD-17",
+          "Anti-Tank Mines"
+        ],
         "Code": "DLUU",
         "Cooldown": "180"
       },
@@ -542,7 +708,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "MD-8 Gas Mines",
-        "Alias": "Gas Mines",
+        "Aliases": [
+          "MD-8",
+          "Gas Mines"
+        ],
         "Code": "DLLR",
         "Cooldown": "180"
       },
@@ -550,7 +719,10 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "MD-6 Anti-Personnel Minefield",
-        "Alias": "Anti-Personnel Minefield",
+        "Aliases": [
+          "MD-6",
+          "Anti-Personnel Minefield"
+        ],
         "Code": "DLUR",
         "Cooldown": "180"
       },
@@ -558,7 +730,9 @@
         "ActivationTime": "4.75",
         "Uses": "Unlimited",
         "Name": "Mines#Incendiary_Mines",
-        "Alias": "Mines#Incendiary_Mines",
+        "Aliases": [
+          "Mines#Incendiary_Mines"
+        ],
         "Code": "DLLD",
         "Cooldown": "180"
       },
@@ -566,7 +740,9 @@
         "ActivationTime": "5",
         "Uses": "5 per Person",
         "Name": "Reinforce",
-        "Alias": "Reinforce",
+        "Aliases": [
+          "Reinforce"
+        ],
         "Code": "UDRLU",
         "Cooldown": "120s"
       },
@@ -574,7 +750,9 @@
         "ActivationTime": "5",
         "Uses": "1",
         "Name": "SOS Beacon",
-        "Alias": "SOS Beacon",
+        "Aliases": [
+          "SOS Beacon"
+        ],
         "Code": "UDRU",
         "Cooldown": "N/A"
       },
@@ -582,7 +760,9 @@
         "ActivationTime": "12",
         "Uses": "Unlimited",
         "Name": "Resupply",
-        "Alias": "Resupply",
+        "Aliases": [
+          "Resupply"
+        ],
         "Code": "DDUR",
         "Cooldown": "160"
       },
@@ -590,7 +770,10 @@
         "ActivationTime": "6",
         "Uses": "Unlimited",
         "Name": "NUX-223 Hellbomb",
-        "Alias": "Hellbomb",
+        "Aliases": [
+          "NUX-223",
+          "Hellbomb"
+        ],
         "Code": "DULDURDU",
         "Cooldown": "30"
       },
@@ -598,7 +781,9 @@
         "ActivationTime": "N/A",
         "Uses": "1 per objective",
         "Name": "SSSD Delivery",
-        "Alias": "SSSD Delivery",
+        "Aliases": [
+          "SSSD Delivery"
+        ],
         "Code": "DDDUU",
         "Cooldown": "N/A"
       },
@@ -606,7 +791,9 @@
         "ActivationTime": "9",
         "Uses": "1 per objective",
         "Name": "Seismic Probe",
-        "Alias": "Seismic Probe",
+        "Aliases": [
+          "Seismic Probe"
+        ],
         "Code": "UULRDD",
         "Cooldown": "N/A"
       },
@@ -614,7 +801,9 @@
         "ActivationTime": "N/A",
         "Uses": "Unlimited",
         "Name": "Upload Data",
-        "Alias": "Upload Data",
+        "Aliases": [
+          "Upload Data"
+        ],
         "Code": "LRUUU",
         "Cooldown": "N/A"
       },
@@ -622,7 +811,9 @@
         "ActivationTime": "N/A",
         "Uses": "Unlimited",
         "Name": "Eagle#General Tips",
-        "Alias": "Eagle#General Tips",
+        "Aliases": [
+          "Eagle#General Tips"
+        ],
         "Code": "UULUR",
         "Cooldown": "2 minutes"
       },
@@ -630,7 +821,9 @@
         "ActivationTime": "N/A",
         "Uses": "5",
         "Name": "SEAF Artillery",
-        "Alias": "SEAF Artillery",
+        "Aliases": [
+          "SEAF Artillery"
+        ],
         "Code": "RUUD",
         "Cooldown": "N/A"
       },
@@ -638,7 +831,9 @@
         "ActivationTime": "N/A",
         "Uses": "N/A",
         "Name": "Super Earth Flag",
-        "Alias": "Super Earth Flag",
+        "Aliases": [
+          "Super Earth Flag"
+        ],
         "Code": "DUDU",
         "Cooldown": "N/A"
       },
@@ -646,7 +841,9 @@
         "ActivationTime": "N/A",
         "Uses": "1 per objective",
         "Name": "Hive Breaker Drill",
-        "Alias": "Hive Breaker Drill",
+        "Aliases": [
+          "Hive Breaker Drill"
+        ],
         "Code": "LUDRDD",
         "Cooldown": "N/A"
       }

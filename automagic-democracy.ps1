@@ -39,8 +39,8 @@ https://github.com/BroManDudeGuyPhD/Helldivers-stratagem-input
 
 param (
     [Alias("stratagem", "code", "strategem")]
-    [Parameter(Mandatory = $false)]
-    [string]$strat,
+    [Parameter(Mandatory = $false, ValueFromRemainingArguments = $true)]
+    [string[]]$strat,
 
     [Alias("init", "initialize")]
     [Parameter(Mandatory = $false)]
@@ -57,155 +57,130 @@ param (
 # Wait time in milliseconds between keypresses
 $keypressWaitTime = 70
 $stratagesmDataFile = "democracy.json"
+$script:AnimTurbo  = $false   # set to $true on keypress to skip remaining animation delays
 
 Add-Type -AssemblyName microsoft.VisualBasic
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName PresentationCore, PresentationFramework
 
-# The following are all "vanity" functions, and will have a setting to disable them in the future. They serve no function other than being pretty
+# ═══════════════════════════════════════════════════════
+# SUPER EARTH ANIMATION ENGINE
+# ═══════════════════════════════════════════════════════
 
-$MenuVertical = "█";
-$MenuHorizontal = "━";
-function Vanity-NewLine ($lines, $ForegroundColor){
-    if($null -eq $ForegroundColor){
-        $ForegroundColor = "Green"
-    }
-
-    for ($i = 0; $i -lt $lines; $i++) {
-        Vanity-Text $MenuVertical -ForegroundColor $ForegroundColor
+# Per-character typewriter with random timing jitter; any keypress sets turbo mode
+function Write-Char {
+    param([string]$Text, [string]$Color = "Green", [int]$Delay = 22, [bool]$Jitter = $true)
+    foreach ($ch in $Text.ToCharArray()) {
+        Write-Host $ch -NoNewline -ForegroundColor $Color
+        if ([Console]::KeyAvailable) { [void][Console]::ReadKey($true); $script:AnimTurbo = $true }
+        if (-not $script:AnimTurbo) {
+            $ms = if ($Jitter) { $Delay + (Get-Random -Maximum 18) } else { $Delay }
+            Start-Sleep -Milliseconds $ms
+        }
     }
 }
 
-function Vanity-Tab ($lines, $ForegroundColor){
-
-    if($null -eq $ForegroundColor){
-        $ForegroundColor = "Green"
+# Single tree line — prefix | label : value, value auto-colored by content
+function Write-TreeLine {
+    param(
+        [string]$Prefix      = "  ├── ",
+        [string]$Label       = "",
+        [string]$Value       = "",
+        [string]$PrefixColor = "Green",
+        [string]$LabelColor  = "Yellow",
+        [string]$ValueColor  = ""
+    )
+    Write-Char $Prefix $PrefixColor 5 $false
+    if ($Label) { Write-Char ($Label + " ") $LabelColor 18 $true }
+    if (-not $ValueColor) {
+        if     ($Value -match 'online|locked|confirmed|engaged|acquired|active|acknowledged|updated|loaded|sanctified') { $ValueColor = "Cyan"    }
+        elseif ($Value -match 'error|failed|unavailable')                                                               { $ValueColor = "Red"     }
+        elseif ($Value -match 'pending|scanning|acquiring|now')                                                         { $ValueColor = "Magenta" }
+        else                                                                                                            { $ValueColor = "Green"   }
     }
-
-    Vanity-Text -text $MenuVertical -ForegroundColor $ForegroundColor -NoReset $true
-
-    for ($i = 0; $i -lt $lines; $i++) {
-        Vanity-Text -text $MenuHorizontal -ForegroundColor $ForegroundColor -NoReset $true
-    }
-    Vanity-Text -text " "-NoReset $true
-}
-function Vanity-Text ($text, $ForegroundColor, $BackgroundColor, [bool]$NoReset, [bool]$SkipTyping){
-    $SplitText = $text.ToCharArray();
-
-    foreach ($char in $SplitText){
-        
-        if($null -eq $ForegroundColor){
-            $ForegroundColor = "Green"
-        }
-
-        if($null -eq $BackgroundColor){
-            $BackgroundColor = "Black"
-        }
-
-        Write-Host $char -NoNewline -ForegroundColor $ForegroundColor -BackgroundColor $BackgroundColor
-
-
-        #Vanity delay for typing effect
-
-        if ($char -eq "."){
-            if($SplitText.Length -eq 1){
-                Start-Sleep -Milliseconds 20  
-            }
-            else{
-                Start-Sleep -Milliseconds 50
-            }
-        }
-
-        elseif($SkipTyping -eq $true){
-            Start-Sleep -Milliseconds 0
-        }
-
-        # Menu characters
-        elseif ($char -eq " ") {
-            Start-Sleep -Milliseconds 0.5
-        }
-        elseif($char -eq $MenuVertical){
-            Start-Sleep -Milliseconds 50
-        }
-        elseif($char -eq $MenuHorizontal){
-            Start-Sleep -Milliseconds 90
-        }
-
-        # Normal Condition
-        else{
-            Start-Sleep -Milliseconds 60
-        }
-        
-    }
-    
-    if($NoReset -eq $true){
-        return
-    }
-
+    Write-Char $Value $ValueColor 22 $true
     Write-Host ""
-
 }
 
-function Vanity-Logo($text, $ForegroundColor, $BackgroundColor){
-    $SplitText = $text.ToCharArray();
-    $previousValue = "";
-    foreach ($char in $SplitText){
-        
-        if($null -eq $ForegroundColor){
-            $ForegroundColor = "Green"
-        }
+# ⚙══...══⚙ divider — always appears instantly; default width matches the logo bar
+function Write-Divider {
+    param([string]$Color = "Green", [int]$Width = 108)
+    $bar = "  ⚙" + ("═" * $Width) + "⚙"
+    Write-Host $bar -ForegroundColor $Color
+}
 
-        if($null -eq $BackgroundColor){
-            $BackgroundColor = ""
+# Background runspace spinner — call Start-Spinner before a blocking op, Stop-Spinner after
+function Start-Spinner {
+    param([string]$Message)
+    $frames = @("⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏")
+    $rs = [System.Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace()
+    $rs.Open()
+    $ps = [System.Management.Automation.PowerShell]::Create()
+    $ps.Runspace = $rs
+    [void]$ps.AddScript({
+        param($msg, $frames)
+        $i = 0
+        while ($true) {
+            [Console]::Write("`r  $($frames[$i % $frames.Count])  $msg  ")
+            $i++
+            Start-Sleep -Milliseconds 80
         }
+    }).AddArgument($Message).AddArgument($frames)
+    [void]$ps.BeginInvoke()
+    return @{ PS = $ps; RS = $rs }
+}
 
-        if($char -eq "|"){
-            if($previousValue -eq "="){
-                Write-Host $char -ForegroundColor $ForegroundColor
-            }
+function Stop-Spinner {
+    param($Spinner, [string]$FinalMessage = "")
+    try { $Spinner.PS.Stop() } catch {}
+    $Spinner.PS.Dispose()
+    $Spinner.RS.Close()
+    $Spinner.RS.Dispose()
+    [Console]::Write("`r" + (" " * 80) + "`r")
+    if ($FinalMessage) { Write-Host $FinalMessage }
+}
 
-            else{
-                Write-Host $char -NoNewline -ForegroundColor $ForegroundColor
-            }
-        }
-        else{
-            Write-Host $char -NoNewline -ForegroundColor $ForegroundColor
-        }
-
-        #Vanity delay for typing effect
-        if ($char -eq "."){
-            Start-Sleep -Milliseconds 10
-        }
-        elseif ($char -eq " ") {
-            Start-Sleep -Milliseconds 0
-        }
-        else{
-            Start-Sleep -Milliseconds 0
-        }
-        $previousValue = $char
+# Boot sequence — plays on terminal launch
+function Invoke-StratagemBoot {
+    Write-Divider "Green"
+    $entries = @(
+        @{ Segs = @(@("  ├── ","Green"),@("[ SUPER EARTH ] ","Cyan"),   @("Establishing orbital uplink..........","Green")); Res = @(" ONLINE",  "Cyan") },
+        @{ Segs = @(@("  ├── ","Green"),@("[ SUPER EARTH ] ","Cyan"),   @("Loading stratagem database...........","Green")); Res = @(" LOADED",  "Cyan") },
+        @{ Segs = @(@("  ├── ","Green"),@("[ DEMOCRACY   ] ","Yellow"), @("Calibrating arrow-key input relay....","Green")); Res = @(" LOCKED",  "Cyan") },
+        @{ Segs = @(@("  └── ","Green"),@("[ DEMOCRACY   ] ","Yellow"), @("Arming stratagem deployment array....","Green")); Res = @(" ENGAGED", "Red")  }
+    )
+    foreach ($entry in $entries) {
+        foreach ($seg in $entry.Segs) { Write-Char $seg[0] $seg[1] 22 $true }
+        if (-not $script:AnimTurbo) { Start-Sleep -Milliseconds (180 + (Get-Random -Maximum 340)) }
+        Write-Char $entry.Res[0] $entry.Res[1] 32 $true
+        Write-Host ""
+        if (-not $script:AnimTurbo) { Start-Sleep -Milliseconds 120 }
     }
-    Write-Host""
+    Write-Divider "Green"
+    Write-Host ""
 }
 
 
 # Main Script Functions
 
 function Setup {
-    <#  Runs setup to make sure system will support script functions, mainly the vanity stuff for now
-        For vanity to work, UTF-8 must be enabled or the terminal will output giberish for some of the characters used to form menus
-        The workaround is basically:
-            1. open intl.cpl from the Run program 
-            2. Choose Administrative menu
-            3. Change system locale
-            4. Check "Beta; Use Unicode UTF-8 for worldwide language support"
-            5. Restart computer
-        https://www.delftstack.com/howto/powershell/powershell-utf-8-encoding-chcp-65001/#google_vignette  #>
+    <#  Run setup to verify UTF-8 is active for the animation engine.
+        If box/spinner characters below appear garbled, enable UTF-8:
+            1. Open intl.cpl from the Run dialog
+            2. Administrative tab → Change system locale
+            3. Check "Beta: Use Unicode UTF-8 for worldwide language support"
+            4. Restart
+        https://www.delftstack.com/howto/powershell/powershell-utf-8-encoding-chcp-65001/  #>
 
-    Write-Host "You should see a vertical bar here: $MenuVertical"
-    Write-Host "You should see a horizontal bar here: $MenuHorizontal"
+    Write-Char "  ⚙  UTF-8 rendering test" "Cyan" 22 $true
+    Write-Host ""
+    Write-TreeLine "  ├── " "BOX CHARS :" "⚙ ═ ├ └ │" "Green" "Yellow" "Green"
+    Write-TreeLine "  ├── " "SPINNER   :" "⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏" "Green" "Yellow" "Green"
+    Write-TreeLine "  └── " "STATUS    :" "If all symbols display cleanly, UTF-8 is active" "Green" "Yellow" "Cyan"
 }
 
 function Update-Json {
+    $script:AnimTurbo = $false
     $DataFileJson = @{}
     $StratagemList = New-Object System.Collections.ArrayList
 
@@ -220,21 +195,47 @@ function Update-Json {
         } catch { }
     }
 
-    # Use the Fandom MediaWiki API — returns JSON with raw wikitext, bypasses Cloudflare entirely.
-    # Works in both Windows PowerShell 5.1 (powershell.exe) and PowerShell 7 (pwsh).
-    # The wikitext encodes arrow directions as {{U}}, {{D}}, {{L}}, {{R}} templates.
+    # Kick off the web fetch in the background so it runs during the boot animation
     $apiURL = "https://helldivers.fandom.com/api.php?action=parse&page=Stratagem_Codes&prop=wikitext&format=json"
+    $fetchJob = Start-Job -ScriptBlock {
+        param($url)
+        Invoke-WebRequest -Uri $url -UseBasicParsing -ErrorAction Stop
+    } -ArgumentList $apiURL
 
+    Write-Host ""
+    Write-Divider "Green"
+    $boot = @(
+        @{ Segs = @(@("  ├── ","Green"),@("[ MECHANICUS ] ","Cyan"),   @("Awakening servo-skull array..........","Green")); Res = @(" ACTIVE",      "Cyan") },
+        @{ Segs = @(@("  ├── ","Green"),@("[ MECHANICUS ] ","Cyan"),   @("Sanctifying data-shrine uplink.......","Green")); Res = @(" CONSECRATED", "Cyan") },
+        @{ Segs = @(@("  ├── ","Green"),@("[ OMNISSIAH  ] ","Yellow"), @("Blessing acquisition subroutines.....","Green")); Res = @(" SANCTIFIED",  "Red")  },
+        @{ Segs = @(@("  └── ","Green"),@("[ OMNISSIAH  ] ","Yellow"), @("Machine spirit communion complete....","Green")); Res = @(" ACKNOWLEDGED","Red")  }
+    )
+    foreach ($entry in $boot) {
+        foreach ($seg in $entry.Segs) { Write-Char $seg[0] $seg[1] 22 $true }
+        if (-not $script:AnimTurbo) { Start-Sleep -Milliseconds (160 + (Get-Random -Maximum 300)) }
+        Write-Char $entry.Res[0] $entry.Res[1] 32 $true
+        Write-Host ""
+        if (-not $script:AnimTurbo) { Start-Sleep -Milliseconds 100 }
+    }
+    Write-Divider "Green"
+    Write-Host ""
+
+    # Collect the fetch result — if the animation ran long enough it's already done; otherwise wait
+    $spin = Start-Spinner "Awaiting machine spirit response..."
     try {
-        $response = Invoke-WebRequest -Uri $apiURL -UseBasicParsing -ErrorAction Stop
+        $response = Receive-Job -Job $fetchJob -Wait -ErrorAction Stop
+        Stop-Spinner $spin
     } catch {
-        Write-Host "Failed to fetch stratagem data: $_" -ForegroundColor Red
+        Stop-Spinner $spin
+        Remove-Job -Job $fetchJob -Force
+        Write-TreeLine "  └── " "ERROR :" "Failed to fetch stratagem data: $_" "Green" "Red" "Red"
         return
     }
+    Remove-Job -Job $fetchJob -Force
 
     $wikitext = ($response.Content | ConvertFrom-Json).parse.wikitext.'*'
     if (-not $wikitext) {
-        Write-Host "Could not parse wikitext from API response." -ForegroundColor Red
+        Write-TreeLine "  └── " "ERROR :" "Could not parse wikitext from API response." "Green" "Red" "Red"
         return
     }
 
@@ -263,17 +264,28 @@ function Update-Json {
         }
         if ($inputCode -eq "") { continue }
 
-        # Generate alias: strip model prefix so "MG-43 Machine Gun" -> "Machine Gun"
-        # Split on first "-", then skip the model number token after the dash
+        # Generate aliases array. For model-prefixed names like "AC-8 Autocannon" produce
+        # both the model designator ("AC-8") and the short name ("Autocannon").
+        # For unprefixed names like "Orbital Laser" produce a single alias equal to the name.
+        $aliases = [System.Collections.Generic.List[string]]::new()
         if ($name.Contains("-")) {
-            $shortName = $name -split '-', 2
-            $parts = $shortName[1] -split ' ', 2
-            $alias = if ($parts.Count -ge 2) { $parts[1].Trim() } else { $shortName[1].Trim() }
+            # Model designator = first space-delimited word (e.g. "AC-8", "MG-43", "AX/ARC-3")
+            $nameParts = $name -split ' ', 2
+            $modelAlias = $nameParts[0].Trim()
+            [void]$aliases.Add($modelAlias)
+            if ($nameParts.Count -ge 2) {
+                # Short name: split on first "-", take the part after, then skip the leading
+                # model-number token — e.g. "8 Autocannon" -> "Autocannon"
+                $shortName = $name -split '-', 2
+                $parts = $shortName[1] -split ' ', 2
+                $shortAlias = if ($parts.Count -ge 2) { $parts[1].Trim() } else { $shortName[1].Trim() }
+                if (-not $shortAlias) { $shortAlias = $nameParts[1].Trim() }
+                if ($shortAlias -and $shortAlias -ne $modelAlias) { [void]$aliases.Add($shortAlias) }
+            }
         } else {
-            # No model prefix; use full name as alias (e.g. "Orbital Laser", "Eagle Rearm")
-            $alias = $name
+            # No model prefix; single alias = full name (e.g. "Orbital Laser", "Eagle Rearm")
+            [void]$aliases.Add($name)
         }
-        if (-not $alias) { $alias = $name }
 
         # Extract the value from a wikitext cell — handles both "|VALUE" and "| style=... |VALUE"
         # Taking the last pipe-delimited segment works for both formats
@@ -291,7 +303,7 @@ function Update-Json {
 
         [void]$StratagemList.Add(@{
             "Name"           = $name
-            "Alias"          = $alias
+            "Aliases"        = $aliases.ToArray()
             "Code"           = $inputCode
             "Cooldown"       = $cooldown
             "Uses"           = $uses
@@ -341,35 +353,31 @@ function Update-Json {
     $added   = @($newStratagemNames | Where-Object { $oldStratagemNames -notcontains $_ })
     $removed = @($oldStratagemNames | Where-Object { $newStratagemNames -notcontains $_ })
 
-    Vanity-NewLine 2
-    Vanity-Tab 4 -ForegroundColor Cyan
-    Vanity-Text "Stratagems UPDATED" -ForegroundColor Cyan
-    Vanity-Tab 4 -ForegroundColor Cyan
-    Vanity-Text "Total: $($newStratagemNames.Count) stratagems" -ForegroundColor Cyan -SkipTyping $true
+    Write-Host ""
+    Write-Divider "Cyan"
+    Write-TreeLine "  ├── " "STATUS :" "Stratagems UPDATED" "Green" "Yellow" "Cyan"
+    Write-TreeLine "  ├── " "TOTAL  :" "$($newStratagemNames.Count) stratagems" "Green" "Yellow" "Cyan"
     if ($oldStratagemNames.Count -gt 0) {
         if ($added.Count -gt 0) {
-            Vanity-Tab 4 -ForegroundColor Green
-            Vanity-Text "+$($added.Count) added" -ForegroundColor Green -SkipTyping $true
-            foreach ($n in $added) {
-                Vanity-Tab 6 -ForegroundColor Green
-                Vanity-Text $n -ForegroundColor Green -SkipTyping $true
+            Write-TreeLine "  ├── " "ADDED  :" "+$($added.Count)" "Green" "Yellow" "Green"
+            for ($i = 0; $i -lt $added.Count; $i++) {
+                $pfx = if ($i -eq $added.Count - 1) { "  │   └── " } else { "  │   ├── " }
+                Write-TreeLine $pfx "" $added[$i] "Green" "Yellow" "Green"
             }
         }
         if ($removed.Count -gt 0) {
-            Vanity-Tab 4 -ForegroundColor Yellow
-            Vanity-Text "-$($removed.Count) removed" -ForegroundColor Yellow -SkipTyping $true
-            foreach ($n in $removed) {
-                Vanity-Tab 6 -ForegroundColor Yellow
-                Vanity-Text $n -ForegroundColor Yellow -SkipTyping $true
+            Write-TreeLine "  ├── " "REMOVED:" "-$($removed.Count)" "Green" "Yellow" "Yellow"
+            for ($i = 0; $i -lt $removed.Count; $i++) {
+                $pfx = if ($i -eq $removed.Count - 1) { "  │   └── " } else { "  │   ├── " }
+                Write-TreeLine $pfx "" $removed[$i] "Green" "Yellow" "Yellow"
             }
         }
         if ($added.Count -eq 0 -and $removed.Count -eq 0) {
-            Vanity-Tab 4 -ForegroundColor Cyan
-            Vanity-Text "No changes from previous data" -ForegroundColor Cyan -SkipTyping $true
+            Write-TreeLine "  ├── " "DELTA  :" "No changes from previous data" "Green" "Yellow" "DarkGray"
         }
     }
-    Vanity-NewLine 2
-    Vanity-Tab 4
+    Write-TreeLine "  └── " "FILE   :" $stratagesmDataFile "Green" "Yellow" "Cyan"
+    Write-Divider "Cyan"
 }
 
 
@@ -380,18 +388,20 @@ Function Learn-Keypress($value) {
 	
         $value = $value.Replace('"', "") # Removes any quotes from parameter input
         $stratagemCodeFile = (Get-Content $stratagesmDataFile -Raw -ErrorAction Stop) | ConvertFrom-Json
-        $requestedCode = $stratagemCodeFile.Democracy.Stratagems | Where-Object { $_.Name -eq $value -or $_.Alias -eq $value }
+        $requestedCode = $stratagemCodeFile.Democracy.Stratagems | Where-Object { $_.Name -eq $value -or $_.Aliases -contains $value }
 
         if ($null -eq $requestedCode) {
-            $requestedCode = $stratagemCodeFile.Democracy.Stratagems | Where-Object { $_.Name.contains($value) -or $_.Alias.contains($value) }
+            $requestedCode = $stratagemCodeFile.Democracy.Stratagems | Where-Object { $_.Name.Contains($value) -or ($_.Aliases | Where-Object { $_.Contains($value) }) }
 
             if ($null -eq $requestedCode) {
                 return "No Stratagems matching $($value)"
             }
-            return $requestedCode
+            # Multiple partial matches possible — take the first; caller can refine
+            $requestedCode = @($requestedCode)[0]
+            return $requestedCode.Code
         }
 
-        return $requestedCode.code
+        return $requestedCode.Code
     }
     catch [System.Management.Automation.ItemNotFoundException] {
         $ButtonType = [System.Windows.MessageBoxButton]::YesNoCancel
@@ -471,81 +481,73 @@ function Get-Funky {
 }
 
 function Show-Menu {
-    Vanity-NewLine 2 -ForegroundColor Magenta 
-    Vanity-Tab 2 -ForegroundColor Magenta 
-    Vanity-Text "Main Menu" -ForegroundColor Magenta 
-    Vanity-Tab 4 -ForegroundColor Cyan
-    Vanity-Text "1: Search Stratagems" -ForegroundColor Cyan -SkipTyping $true
-    Vanity-Tab 4 -ForegroundColor Cyan
-    Vanity-Text "2: UPDATE Stratagems" -ForegroundColor Cyan -SkipTyping $true
-    Vanity-Tab 4 -ForegroundColor Cyan
-    Vanity-Text "3: Configure Ship Modules " -ForegroundColor Cyan -SkipTyping $true
-    Vanity-Tab 4 -ForegroundColor Cyan
-    Vanity-Text "4: Stratagem Hero$([char]174) *COMING SOON*" -ForegroundColor Cyan -SkipTyping $true
-    Vanity-Tab 4 -ForegroundColor Cyan
-    Vanity-Text "   (Q)uit - (H)elp - (M)enu" -ForegroundColor White -SkipTyping $true
+    Write-Host ""
+    Write-Divider "Magenta"
+    Write-Char "  ⚙  STRATAGEM RELAY — MAIN MENU" "Magenta" 14 $true
+    Write-Host ""
+    Write-Divider "Magenta"
+    Write-TreeLine "  ├── " "[ 1 ]" "Search Stratagems"             "Green" "Yellow" "Cyan"
+    Write-TreeLine "  ├── " "[ 2 ]" "UPDATE Stratagems"             "Green" "Yellow" "Cyan"
+    Write-TreeLine "  ├── " "[ 3 ]" "Configure Ship Modules"        "Green" "Yellow" "Cyan"
+    Write-TreeLine "  ├── " "[ 4 ]" "Stratagem Hero® *COMING SOON*" "Green" "Yellow" "DarkGray"
+    Write-TreeLine "  └── " "[ Q ]" "Quit  |  (H)elp  |  (M)enu"   "Green" "Yellow" "White"
+    Write-Divider "Green"
 }
 
 function terminal() {
+    $script:AnimTurbo = $false
     [System.Console]::Clear()
-    Write-Host "|------------------------------------------------------------------------------------------------------------- |" -ForegroundColor DarkBlue
-    Vanity-Logo @'                                                                                                                
-|            $$$$$$\              $$\                       $$$$$$\    $$\                         $$\         |
-|           $$  __$$\             $$ |                     $$  __$$\   $$ |                        $$ |        |
-|           $$ /  $$ |$$\   $$\ $$$$$$\    $$$$$$\         $$ /  \__|$$$$$$\    $$$$$$\  $$$$$$\ $$$$$$\       |
-|           $$$$$$$$ |$$ |  $$ |\_$$  _|  $$  __$$\ $$$$$$\\$$$$$$\  \_$$  _|  $$  __$$\ \____$$\\_$$  _|      |
-|           $$  __$$ |$$ |  $$ |  $$ |    $$ /  $$ |\______|\____$$\   $$ |    $$ |  \__|$$$$$$$ | $$ |        |
-|           $$ |  $$ |$$ |  $$ |  $$ |$$\ $$ |  $$ |       $$\   $$ |  $$ |$$\ $$ |     $$  __$$ | $$ |$$\     |
-|           $$ |  $$ |\$$$$$$  |..\$$$$  |\$$$$$$  |.......\$$$$$$  |..\$$$$  |$$ |.....\$$$$$$$ | \$$$$  |    |
-|...........\__|..\__|.\______/....\____/..\______/.........\______/....\____/.\__|......\_______|..\____/.... |                                                                                                                                                                                                                                                                 
-'@.Trim() -ForegroundColor Magenta
-Vanity-Logo "|                                                                                                              |" -ForegroundColor Magenta
-Vanity-Logo "| Author: BroManDudeGuyPhD               Automated Stratagem Deployment                           version 1.2  |" -ForegroundColor Cyan
-Vanity-Logo "|----------------------------------------- Aiding Democracy since 2024 --------------------------------------- |" -ForegroundColor Magenta
-
+    Write-Divider "DarkBlue"
+    $logo = @'
+            $$$$$$\              $$\                       $$$$$$\    $$\                         $$\        
+           $$  __$$\             $$ |                     $$  __$$\   $$ |                        $$ |       
+           $$ /  $$ |$$\   $$\ $$$$$$\    $$$$$$\         $$ /  \__|$$$$$$\    $$$$$$\  $$$$$$\ $$$$$$\      
+           $$$$$$$$ |$$ |  $$ |\_$$  _|  $$  __$$\ $$$$$$\\$$$$$$\  \_$$  _|  $$  __$$\ \____$$\\_$$  _|     
+           $$  __$$ |$$ |  $$ |  $$ |    $$ /  $$ |\______|\____$$\   $$ |    $$ |  \__|$$$$$$$ | $$ |       
+           $$ |  $$ |$$ |  $$ |  $$ |$$\ $$ |  $$ |       $$\   $$ |  $$ |$$\ $$ |     $$  __$$ | $$ |$$\    
+           $$ |  $$ |\$$$$$$  |  \$$$$  |\$$$$$$  |       \$$$$$$  |  \$$$$  |$$ |     \$$$$$$$ | \$$$$  |   
+           \__|  \__| \______/    \____/  \______/         \______/    \____/ \__|      \_______| \____/    
+'@
+    foreach ($line in ($logo -split "`n")) {
+        Write-Host $line -ForegroundColor Magenta
+        if ([Console]::KeyAvailable) { [void][Console]::ReadKey($true); $script:AnimTurbo = $true }
+        if (-not $script:AnimTurbo) { Start-Sleep -Milliseconds 60 }
+    }
+    Write-Divider "DarkBlue"
+    Write-Host ""
+    Write-Host "    Author: BroManDudeGuyPhD          Automated Stratagem Deployment          v1.3" -ForegroundColor Cyan
+    Write-Host ""
+    Invoke-StratagemBoot
     Show-Menu
     do {
-        Vanity-NewLine 1
-        Vanity-Tab 2
-        $selection = Read-Host "Please make a selection" 
+        Write-Host ""
+        Write-Char "  ⚙  " "Green" 0 $false
+        $selection = Read-Host "Command"
         switch ($selection) {
             '1' {
-                $enteredCode = Read-Host "Stratagem Name"
+                Write-Char "  ├── " "Green" 0 $false
+                $enteredCode = Read-Host "Stratagem designation"
                 $code = Learn-Keypress -value $enteredCode
-                $code
-            } '2' {
-                Update-Json
-            } '3' {
-                'Coming soon Helldiver... go spread Democracy in the meantime'
-            }'4' {
-                'Ship Configuration coming soon Helldiver... go spread Democracy in the meantime'
-            }'h' {
-                'To execute stratagem input, run the script like automagic-democracy -strat "Autocannon". You may not see anything happen, but you can download a keyboard visualizer to check that it is working. If you are having trouble getting started, check out https://github.com/BroManDudeGuyPhD/Helldivers-stratagem-input'
+                if ($code) {
+                    Write-TreeLine "  └── " "RESULT :" $code "Green" "Yellow" "Cyan"
+                }
             }
-            'help' {
-                'To execute stratagem input, run the script like automagic-democracy -strat "Autocannon". You may not see anything happen, but you can download a keyboard visualizer to check that it is working. If you are having trouble getting started, check out https://github.com/BroManDudeGuyPhD/Helldivers-stratagem-input'
-            }
-            'm' {
-                Show-Menu
-            }
-            'menu' {
-                Show-Menu
-            }
-            ''{
-                Show-Menu
-            }
+            '2' { Update-Json }
+            '3' { Write-TreeLine "  └── " "STATUS :" "Ship Modules coming soon — spread Democracy" "Green" "Yellow" "DarkGray" }
+            '4' { Write-TreeLine "  └── " "STATUS :" "Stratagem Hero coming soon — spread Democracy" "Green" "Yellow" "DarkGray" }
+            'h'    { Write-TreeLine "  └── " "HELP :" 'Run: automagic-democracy -strat "Autocannon"' "Green" "Yellow" "Cyan" }
+            'help' { Write-TreeLine "  └── " "HELP :" 'Run: automagic-democracy -strat "Autocannon"' "Green" "Yellow" "Cyan" }
+            'm'    { Show-Menu }
+            'menu' { Show-Menu }
+            ''     { Show-Menu }
             default {
-                if ($selection -ne 'q'){
-                    Vanity-Tab 4 -ForegroundColor Red
-                    Vanity-Text "`'$selection`' is not a valid selection" -ForegroundColor Red
+                if ($selection -ne 'q') {
+                    Write-TreeLine "  └── " "ERROR :" "'$selection' is not a valid selection" "Green" "Red" "Red"
                 }
             }
         }
-        
     }
     until ($selection -eq 'q')
-
-
 }
 
 
@@ -560,7 +562,8 @@ elseif ($terminal) {
 }
 
 elseif ($strat) {
-    $code = Learn-Keypress -value $strat
+    $stratValue = ($strat -join " ").Trim()
+    $code = Learn-Keypress -value $stratValue
     if ($code) {
         Enter-Keypress -stratagemCode $code
     }
